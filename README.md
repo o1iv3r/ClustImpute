@@ -21,8 +21,12 @@ The intuition is that observation should be clustered with other observations ma
 You can install the released version of ClustImpute with:
 
 ``` r
-install.packages("ClustImpute") # not on CRAN at the moment
-devtools::install_github("o1iv3r/ClustImpute",build_vignettes = TRUE)
+# install.packages("ClustImpute") # not on CRAN at the moment
+
+# from github
+devtools::install_github("o1iv3r/ClustImpute")
+# ... including vignette
+remotes::install_github("o1iv3r/ClustImpute", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"),force=TRUE)
 ```
 
 ## Example
@@ -36,4 +40,8 @@ library(ClustImpute)
 ClustImpute(X,nr_cluster)
 ```
 
-However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette.
+However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette
+
+``` r
+vignette("Example_on_simulated_data")
+```
