@@ -33,7 +33,7 @@ Using the default parameters ClustImpute can be used as follows
 library(ClustImpute)
 # X is a data frame
 # nr_cluster is the number of clusters desired
-ClustImpute <- function(X,nr_cluster)
+ClustImpute(X,nr_cluster)
 ```
 
 However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette.
