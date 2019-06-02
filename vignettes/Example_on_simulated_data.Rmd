@@ -1,0 +1,260 @@
+---
+title: "Example_on_simulated_data"
+output: rmarkdown::html_vignette
+fig_width: 6 
+fig_height: 4 
+vignette: >
+  %\VignetteIndexEntry{Example_on_simulated_data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup, include = FALSE}
+library(ClustImpute)
+required_packages <- Hmisc::Cs(psych,ggplot2,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr)
+lapply(required_packages, require, character.only = TRUE)
+```
+
+# Simulated data with missings
+
+First we create a random dataset with some structure and a few uncorrelated variables
+
+```{r}
+### Random Dataset
+set.seed(739)
+n <- 7500 # numer of points
+nr_other_vars <- 4
+mat <- matrix(rnorm(nr_other_vars*n),n,nr_other_vars)
+me<-4 # mean
+x <- c(rnorm(n/3,me/2,1),rnorm(2*n/3,-me/2,1)) 
+y <- c(rnorm(n/3,0,1),rnorm(n/3,me,1),rnorm(n/3,-me,1))
+true_clust <- c(rep(1,n/3),rep(2,n/3),rep(3,n/3)) # true clusters
+dat <- cbind(mat,x,y)
+dat<- as.data.frame(scale(dat)) # scaling
+summary(dat)
+```
+
+One can clearly see the three clusters
+
+```{r}
+plot(dat$x,dat$y)
+```
+
+We create a few missings using a custom function
+
+
+```{r}
+dat_with_miss <- miss_sim(dat,p=.1,seed_nr=123)
+summary(dat_with_miss)
+mis_ind <- is.na(dat_with_miss) # missing indicator
+```
+
+Clearly, an imputation with the median value does a pretty bad job here:
+
+```{r}
+dat_median_imp <- dat_with_miss
+for (j in 1:dim(dat)[2]) {
+  dat_median_imp[,j] <- Hmisc::impute(dat_median_imp[,j],fun=median)
+}
+imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
+ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
+```
+
+
+But also a random imputation is not much better: it creates plenty of points in areas with no data
+
+```{r}
+dat_random_imp <- dat_with_miss
+for (j in 1:dim(dat)[2]) {
+  dat_random_imp[,j] <- impute(dat_random_imp[,j],fun="random")
+}
+imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
+ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
+```
+
+A cluster base on random imputation will thus not provide good results (even if we "know" the number of clusters)
+
+```{r}
+tic("Clustering based on random imputation")
+cl_compare <- KMeans_arma(data=dat_random_imp,clusters=3,n_iter=100,seed=751)
+toc()
+dat_random_imp$pred <- predict_KMeans(dat_random_imp,cl_compare)
+ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
+```
+
+
+# Solution: ClustImpute
+
+We'll now use ClustImpute and also measure the run-time. In short, the algorithm follows these steps
+
+1. It replaces all NAs by random imputation, i.e., for each variable with missings, it draws from the marginal distribution of this variable not taking into account any correlations with other variables
+2. Weights <1 are used to adjust the scale of an observation that was generated in step 1. The weights are calculated by a (linear) weight function that starts near zero and converges to 1 at n_end.
+3. A k-means clustering is performed with a number of c_steps steps starting with a random initialization.
+4. The values from step 2 are replaced by new draws conditionally on the assign cluster from step 3.
+5. Steps 2-4 are repeated nr_iter times in total. The k-means clustering in step 3 uses the previous cluster centroids for initialization.
+6. After the last draws a final k-means clustering is performed.
+
+The intuition is that observation should be clustered with other observations mainly based on their observed values, while the resulting clusters provide donors for the missing value imputation, so that subsequently all variables can be used for the clustering. 
+
+
+```{r}
+nr_iter <- 10 # iterations of procedure
+n_end <- 10 # step until convergence of weight function to 1
+nr_cluster <- 3 # number of clusters
+c_steps <- 50 # numer of cluster steps per iteration
+tic("Run ClustImpute")
+res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
+toc()
+```
+
+ClustImpute provides several results:
+
+```{r}
+str(res)
+```
+
+We'll first look at the complete data and clustering results. Quite obviously, it gives better results then median / random imputation.
+
+```{r}
+ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
+```
+
+Packages like MICE compute a traceplot of mean and variance for various chain. Here we only have a single realization  and thus re-run ClustImpute with various seeds to obtain different realizations. 
+
+```{r}
+res2 <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end,seed_nr = 2)
+res3 <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end,seed_nr = 3)
+mean_all <- rbind(res$imp_values_mean,res2$imp_values_mean,res3$imp_values_mean)
+sd_all <- rbind(res$imp_values_sd,res2$imp_values_sd,res3$imp_values_sd)
+```
+
+
+```{r}
+mean_all <- cbind(mean_all,seed=rep(c(150519,2,3),each=11))
+sd_all <- cbind(sd_all,seed=rep(c(150519,2,3),each=11))
+```
+
+The realizations mix nicely with each other.
+
+```{r}
+ggplot(as.data.frame(mean_all)) + geom_line(aes(x=iter,y=V1,color=factor(seed))) + ggtitle("Mean")
+ggplot(as.data.frame(sd_all)) + geom_line(aes(x=iter,y=V1,color=factor(seed))) + ggtitle("Std. dev.")
+```
+
+
+
+# Quality of imputation and cluster results
+
+## Marginal distributions
+
+We compare marginal distributions using a violin plot of x and y
+
+```{r}
+dat4plot <- dat
+dat4plot$true_clust <- true_clust
+Xfinal <- res$complete_data
+Xfinal$pred <- res$clusters
+
+par(mfrow=c(1,2))
+violinBy(dat4plot,"x","true_clust",main="Original data")
+violinBy(dat4plot,"y","true_clust",main="Original data")
+violinBy(Xfinal,"x","pred",main="imputed data")
+violinBy(Xfinal,"y","pred",main="imputed data")
+violinBy(dat_random_imp,"x","pred",main="random imputation")
+violinBy(dat_random_imp,"y","pred",main="random imputation")
+```
+
+In particular for y the distribution by cluster is quite far away from the original distribution for the random imputation based clustering.
+
+## External validation: rand index
+
+Below we compare the rand index between true and fitted cluster assignment. For all cases we obtain
+
+```{r}
+external_validation(true_clust, res$clusters)
+```
+
+
+It is considerably lower for random imputation:
+
+```{r}
+class(dat_random_imp$pred) <- "numeric"
+external_validation(true_clust, dat_random_imp$pred)
+```
+
+Of course, it is much higher on the (small number of) complete cases.
+
+```{r}
+## complete cases
+idx <- which(complete.cases(dat_with_miss)==TRUE)
+length(idx) # number
+external_validation(true_clust[idx], res$clusters[idx])
+```
+
+The function also computes a variety of other stats
+
+```{r}
+external_validation(true_clust, res$clusters,summary_stats = TRUE)
+```
+
+
+## Variance reduction
+
+We assess quality of clusters, we compute the sum of squares within each cluster, sum up this value and compare it by the total sum of squares.
+
+```{r}
+res_var <- var_reduction(res)
+res_var$Variance_reduction
+res_var$Variance_by_cluster
+```
+
+We se a reduction of about 27\% using only 3 clusters, most strikingly for x and y because that these variables define the subspace of the true clusters.
+
+More clusters will capture the random distribution of the other variables
+
+```{r}
+res <- ClustImpute(dat_with_miss,nr_cluster=10, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end)
+res_var <- var_reduction(res)
+res_var$Variance_reduction
+res_var$Variance_by_cluster
+```
+
+
+We'll do this exercise for a several values of nr_cluster (and need a helper function for that since X is an argument of ClustImpute)
+
+```{r}
+ClustImpute2 <- function(dataFrame,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519) {
+  return(ClustImpute(dataFrame,nr_cluster, nr_iter, c_steps, wf, n_end, seed_nr))
+}
+res_list <- lapply(X=1:10,FUN=ClustImpute2,dataFrame=dat_with_miss, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end)
+```
+
+..and put the variances by cluster in a table
+
+```{r}
+tmp <- var_reduction(res_list[[1]])
+var_by_clust <- tmp$Variance_by_cluster
+for (k in 2:10) {
+  tmp <- var_reduction(res_list[[k]])
+  var_by_clust <- rbind(var_by_clust,tmp$Variance_by_cluster)
+}
+var_by_clust$nr_clusters <- 1:10
+```
+
+
+While there is a rather gradual improvement for the other variables, x and y have a minimum showing optimality for these variables. Such a plot clearly indicates that 3 clusters are a good choice for this data set.
+
+```{r}
+data2plot <- tidyr::gather(var_by_clust,key = "variable", value = "variance", -dplyr::one_of("nr_clusters"))
+ggplot(data2plot,aes(x=nr_clusters,y=variance,color=variable)) + geom_line() + scale_x_continuous(breaks=1:10)
+```
+

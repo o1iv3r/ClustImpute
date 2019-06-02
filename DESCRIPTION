@@ -1,0 +1,28 @@
+Package: ClustImpute
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Oliver Pfaffel
+Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
+Description: This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    ClusterR,
+    copula,
+    dplyr,
+    magrittr
+Suggests: 
+    psych,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0),
+    tidyr,
+    Hmisc,
+    tictoc,
+    spelling
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
+Language: en-US
