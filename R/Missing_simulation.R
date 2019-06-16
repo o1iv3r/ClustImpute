@@ -9,6 +9,10 @@
 #' @param seed_nr Number for set.seed()
 #'
 #' @return data frame with only numeric values and NAs
+#' @examples
+#' data(cars)
+#' cars_with_missings <- miss_sim(cars,p = .2,seed_nr = 4)
+#' summary(cars_with_missings)
 #'
 #' @export
 miss_sim <- function(dat,p=.2,type="MAR",seed_nr=123) {
@@ -17,9 +21,9 @@ miss_sim <- function(dat,p=.2,type="MAR",seed_nr=123) {
 
   if (type=="MAR") {
     # create random correlation matrix for the copula
-    cor_param <- 2*stats::runif(dim * (dim - 1) / 2)-1
+    cor_param <- 2*stats::runif(dim * (dim - 1) / 2)-1 # numbers between -1 and 1
     cor_matrix <- stats::cov2cor(copula::p2P(cor_param) %*% t(copula::p2P(cor_param))) # make sure the matrix is positive definite
-    cor_matrix <- copula::P2p(cor_matrix)
+    cor_matrix <- copula::P2p(cor_matrix) # convert matrix to vector for copula::normalCopula
   } else if (type=="MCAR") {
     cor_matrix <- diag(dim)
     cor_matrix <- copula::P2p(cor_matrix)

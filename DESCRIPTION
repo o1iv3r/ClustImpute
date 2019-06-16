@@ -22,7 +22,8 @@ Suggests:
     tidyr,
     Hmisc,
     tictoc,
-    spelling
+    spelling,
+    corrplot
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 Language: en-US

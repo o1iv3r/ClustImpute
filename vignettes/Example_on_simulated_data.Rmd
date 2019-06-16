@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ```{r setup, include = FALSE}
 library(ClustImpute)
-required_packages <- Hmisc::Cs(psych,ggplot2,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr)
+required_packages <- Hmisc::Cs(psych,ggplot2,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr,corrplot)
 lapply(required_packages, require, character.only = TRUE)
 ```
 
@@ -49,14 +49,23 @@ One can clearly see the three clusters
 plot(dat$x,dat$y)
 ```
 
-We create a few missings using a custom function
-
+We create a 20% missings using a custom function
 
 ```{r}
-dat_with_miss <- miss_sim(dat,p=.1,seed_nr=123)
+dat_with_miss <- miss_sim(dat,p=.2,seed_nr=120)
 summary(dat_with_miss)
 mis_ind <- is.na(dat_with_miss) # missing indicator
 ```
+
+The correlation matrix of the missing indicator shows that the missings are correlated - thus we are not in a missing completely at random stetting:
+
+```{r}
+corrplot(cor(mis_ind),method="number")
+```
+
+
+# Median or random imputation
+
 
 Clearly, an imputation with the median value does a pretty bad job here:
 
@@ -196,8 +205,8 @@ Of course, it is much higher on the (small number of) complete cases.
 ```{r}
 ## complete cases
 idx <- which(complete.cases(dat_with_miss)==TRUE)
-length(idx) # number
-external_validation(true_clust[idx], res$clusters[idx])
+sprintf("Number of complete cases is %s",length(idx))
+sprintf("Rand index for this case %s", external_validation(true_clust[idx], res$clusters[idx]))
 ```
 
 The function also computes a variety of other stats

@@ -15,3 +15,11 @@ integer value typically between 0 and 1
 \description{
 Computes one minus the ratio of the sum of all within cluster variances by the overall variance
 }
+\examples{
+\dontrun{
+# cf. help for ClustImpute
+res <- ClustImpute(dat_with_miss,nr_cluster=3)
+var_reduction(res)
+}
+
+}

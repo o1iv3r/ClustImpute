@@ -19,6 +19,35 @@
 #'   \item{imp_values_sd}{Standard deviation of the imputed variables per draw}
 #' }
 #'
+#' @examples
+#'# Random Dataset
+#'set.seed(739)
+#'n <- 750 # numer of points
+#'nr_other_vars <- 2
+#'mat <- matrix(rnorm(nr_other_vars*n),n,nr_other_vars)
+#'me<-4 # mean
+#'x <- c(rnorm(n/3,me/2,1),rnorm(2*n/3,-me/2,1))
+#'y <- c(rnorm(n/3,0,1),rnorm(n/3,me,1),rnorm(n/3,-me,1))
+#'dat <- cbind(mat,x,y)
+#'dat<- as.data.frame(scale(dat)) # scaling
+#'
+#'# Create NAs
+#'dat_with_miss <- miss_sim(dat,p=.1,seed_nr=120)
+#'
+#'# Run ClustImpute
+#'res <- ClustImpute(dat_with_miss,nr_cluster=3)
+#'
+#'# Extract complete data set and cluster assignment
+#'res$complete_data
+#'res$clusters
+#'
+#'# Plot complete data set and cluster assignment
+#'ggplot2::ggplot(res$complete_data,ggplot2::aes(x,y,color=factor(res$clusters))) +
+#'ggplot2::geom_point()
+#'
+#'# View centroids
+#'res$centroids
+#'
 #' @export
 ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519) {
 
@@ -110,15 +139,19 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
 
 #' K-means clustering with build-in missing data imputation
 #'
-#' Default weight function
+#' Default weight function. One minus the return value is multiplied with missing(=imputed) values.
+#'  It starts with 1 and goes to 0 at n_end.
 #'
 #' @param n current step
-#' @param n_end steps until convergence of weight function to 1
+#' @param n_end steps until convergence of weight function to 0
 #' @return value between 0 and 1
+#' @examples
+#' x <- 0:20
+#' plot(x,1-default_wf(x))
 #'
 #' @export
 default_wf <- function(n,n_end=10) {
-  y <- 1-min(n/n_end,1)
+  y <- 1-pmin(n/n_end,1)
   return(y)
 }
 
@@ -129,6 +162,12 @@ default_wf <- function(n,n_end=10) {
 #' @param newdata Data frame
 #' @param ... additional arguments affecting the predictions produced - not currently used
 #' @return integer value (cluster assignment)
+#' @examples
+#' \dontrun{
+#' # cf. help for ClustImpute
+#' res <- ClustImpute(dat_with_miss,nr_cluster=3)
+#' predict(res,newdata=dat[1,])
+#' }
 #'
 #' @export
 predict.kmeans_ClustImpute <- function(object,newdata,...) {
@@ -144,6 +183,12 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 #'
 #' @param clusterObj Object of class kmeans_ClustImpute
 #' @return integer value typically between 0 and 1
+#' @examples
+#' \dontrun{
+#' # cf. help for ClustImpute
+#' res <- ClustImpute(dat_with_miss,nr_cluster=3)
+#' var_reduction(res)
+#' }
 #'
 #' @export
 var_reduction <- function(clusterObj) {

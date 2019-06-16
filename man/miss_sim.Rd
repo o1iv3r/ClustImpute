@@ -22,3 +22,9 @@ data frame with only numeric values and NAs
 Simulates missing at random using a normal copula to create correlations between the missing (type="MAR").
 Missings appear in each column of the provided data frame with the same ratio.
 }
+\examples{
+data(cars)
+cars_with_missings <- miss_sim(cars,p = .2,seed_nr = 4)
+summary(cars_with_missings)
+
+}

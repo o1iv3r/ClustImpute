@@ -19,3 +19,11 @@ integer value (cluster assignment)
 \description{
 Prediction method
 }
+\examples{
+\dontrun{
+# cf. help for ClustImpute
+res <- ClustImpute(dat_with_miss,nr_cluster=3)
+predict(res,newdata=dat[1,])
+}
+
+}

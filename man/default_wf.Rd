@@ -9,11 +9,17 @@ default_wf(n, n_end = 10)
 \arguments{
 \item{n}{current step}
 
-\item{n_end}{steps until convergence of weight function to 1}
+\item{n_end}{steps until convergence of weight function to 0}
 }
 \value{
 value between 0 and 1
 }
 \description{
-Default weight function
+Default weight function. One minus the return value is multiplied with missing(=imputed) values.
+ It starts with 1 and goes to 0 at n_end.
+}
+\examples{
+x <- 0:20
+plot(x,1-default_wf(x))
+
 }
