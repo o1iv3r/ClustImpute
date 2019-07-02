@@ -52,10 +52,6 @@ dat_with_miss <- miss_sim(dat,p=.1,seed_nr=120)
 # Run ClustImpute
 res <- ClustImpute(dat_with_miss,nr_cluster=3)
 
-# Extract complete data set and cluster assignment
-res$complete_data
-res$clusters
-
 # Plot complete data set and cluster assignment
 ggplot2::ggplot(res$complete_data,ggplot2::aes(x,y,color=factor(res$clusters))) +
 ggplot2::geom_point()

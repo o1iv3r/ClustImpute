@@ -37,10 +37,6 @@
 #'# Run ClustImpute
 #'res <- ClustImpute(dat_with_miss,nr_cluster=3)
 #'
-#'# Extract complete data set and cluster assignment
-#'res$complete_data
-#'res$clusters
-#'
 #'# Plot complete data set and cluster assignment
 #'ggplot2::ggplot(res$complete_data,ggplot2::aes(x,y,color=factor(res$clusters))) +
 #'ggplot2::geom_point()
@@ -169,6 +165,7 @@ default_wf <- function(n,n_end=10) {
 #' predict(res,newdata=dat[1,])
 #' }
 #'
+#' @rdname predict
 #' @export
 predict.kmeans_ClustImpute <- function(object,newdata,...) {
   pred <- ClusterR::predict_KMeans(newdata,object$centroids)
