@@ -10,7 +10,7 @@ ClustImpute features a k-means clustering algorithm that includes a powerful ite
 
 ClustImpute draws missing values iteratively based on the current cluster assignment so that correlations are considered. Subsequently, penalizing weights are imposed on imputed values and successively decreased (to zero) as the missing data imputation gets better.The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distribution independently of the clustering.
 
-![*ClustImpute vs. a clustering based on random imputation.*](ClustImpute vs random imputation.png)
+![*ClustImpute vs. a clustering based on random imputation.*](ClustImpute_vs_random_imputation.png)
 
 
 ## Installation
