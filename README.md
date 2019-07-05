@@ -6,11 +6,11 @@
 
 ClustImpute features a k-means clustering algorithm that includes a powerful iterative multiple missing data imputation method. Why is this relevant? Often a clustering based on median or random imputation will not provide good results even if we “know” the number of clusters. Both approaches badly distort the data set below and lead to bad clusters:
 
-![](Median_random_imp.png)
+![*Comparison of median with random imputation.*](Median_random_imp.png)
 
 ClustImpute draws missing values iteratively based on the current cluster assignment so that correlations are considered. Subsequently, penalizing weights are imposed on imputed values and successively decreased (to zero) as the missing data imputation gets better.The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distribution independently of the clustering.
 
-![](ClustImpute vs random imputation.png)
+![*ClustImpute vs. a clustering based on random imputation.*](ClustImpute vs random imputation.png)
 
 
 ## Installation
