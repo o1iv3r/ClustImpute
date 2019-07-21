@@ -4,7 +4,7 @@ language: R
 cache: packages
 
 before_install:
-  - sudo apt-get -qq update
+  - sudo apt-get install libgsl0ldbl
   - sudo apt-get install gsl-bin libgsl2 libgsl-dev r-cran-rmpi
 
 r:
