@@ -4,7 +4,7 @@ Title: K-means clustering with build-in missing data imputation
 Version: 0.1.2
 Author: Oliver Pfaffel
 Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
-Description: This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased.
+Description: This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased. See the vignette for details.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
