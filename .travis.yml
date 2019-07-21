@@ -1,12 +1,11 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
+sudo: true
 cache: packages
 
 r:
-  - oldrel
   - release
-  - devel
 
 r_github_packages:
   - r-lib/covr
@@ -15,7 +14,7 @@ r_packages:
   - libgsl0-dev
 
 r_binary_packages:
-  - copula
+  - gsl
 
 after_success:
   - Rscript -e 'covr::codecov()'
