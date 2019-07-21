@@ -1,6 +1,6 @@
 Package: ClustImpute
 Type: Package
-Title: What the Package Does (Title Case)
+Title: K-means clustering with build-in missing data imputation
 Version: 0.1.2
 Author: Oliver Pfaffel
 Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
