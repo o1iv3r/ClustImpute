@@ -9,8 +9,10 @@ r:
 r_github_packages:
   - r-lib/covr
 
-r_packages:
-  - libgsl0-dev
+addons:
+  apt:
+    packages:
+    - libcurl4-openssl-dev
 
 after_success:
   - Rscript -e 'covr::codecov()'
