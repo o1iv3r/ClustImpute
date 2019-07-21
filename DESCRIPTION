@@ -12,7 +12,8 @@ Imports:
     ClusterR,
     copula,
     dplyr,
-    magrittr
+    magrittr,
+    rlang
 Suggests: 
     psych,
     ggplot2,

@@ -191,14 +191,14 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 var_reduction <- function(clusterObj) {
   # within cluster variances
   within_var <- clusterObj$complete_data %>% dplyr::mutate(pred=clusterObj$clusters) # add prediciton column
-  cluster_sizes <- within_var %>% dplyr::group_by(pred) %>% dplyr::count() %>%
-    dplyr::ungroup(pred) %>% dplyr::select(n) %>% dplyr::pull()
-  within_var <- within_var %>% dplyr::group_by(pred) %>% dplyr::summarise_all(stats::var) %>%
-    dplyr::select(-pred) %>% dplyr::summarise_all(stats::weighted.mean,w=cluster_sizes,na.rm=TRUE)
+  cluster_sizes <- within_var %>% dplyr::group_by(.data$pred) %>% dplyr::count() %>%
+    dplyr::ungroup(.data$pred) %>% dplyr::select(.data$n) %>% dplyr::pull()
+  within_var <- within_var %>% dplyr::group_by(.data$pred) %>% dplyr::summarise_all(stats::var) %>%
+    dplyr::select(-.data$pred) %>% dplyr::summarise_all(stats::weighted.mean,w=cluster_sizes,na.rm=TRUE)
   within_var_sum <- sum(within_var) # sum of all within cluster variances
 
   # overall variance
-  overall_var <- sum(clusterObj$complete_data %>% dplyr::summarise_all(var))
+  overall_var <- sum(clusterObj$complete_data %>% dplyr::summarise_all(stats::var))
 
   return(list(Variance_reduction=1-within_var_sum/overall_var,Variance_by_cluster=within_var))
 }
