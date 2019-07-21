@@ -4,13 +4,15 @@ language: R
 cache: packages
 
 before_install:
-  - sudo apt-get install libgsl0-dev
+  - sudo apt-get install libgsl0-dev libgsl0ldbl
 
 r:
   - release
 
 r_github_packages:
   - r-lib/covr
+  - cran/gsl
+
 
 after_success:
   - Rscript -e 'covr::codecov()'
