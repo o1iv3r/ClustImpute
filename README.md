@@ -1,10 +1,12 @@
 # ClustImpute
 
 <!-- badges: start -->
+[![Travis build status](https://travis-ci.org/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.org/o1iv3r/ClustImpute)
+[![Codecov test coverage](https://codecov.io/gh/o1iv3r/ClustImpute/branch/master/graph/badge.svg)](https://codecov.io/gh/o1iv3r/ClustImpute?branch=master)
 <!-- badges: end -->
 
 
-ClustImpute features a k-means clustering algorithm that includes a powerful iterative multiple missing data imputation method. Why is this relevant? Often a clustering based on median or random imputation will not provide good results even if we “know” the number of clusters. Both approaches badly distort the data set below and lead to bad clusters:
+ClustImpute features a k-means clustering algorithm that includes a powerful iterative multiple missing data imputation method. Why is this relevant? Often a clustering based on median or random imputation will not provide good results even if we Ã¢â‚¬Å“knowÃ¢â‚¬Â the number of clusters. Both approaches badly distort the data set below and lead to bad clusters:
 
 ![*Comparison of median with random imputation.*](Median_random_imp.png)
 
@@ -45,7 +47,7 @@ vignette("Example_on_simulated_data")
 
 ## Details on ClustImpute
 
-This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased. The hope is that at some point the observed point is near a cluster that provides a good neighborhood to draw the missing variable from. The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distriubtion, e.g., as implemented in the MICE package.
+This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased. The hope is that at some point the observed point is near a cluster that provides a good neighborhood to draw the missing variable from. The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distribution, e.g., as implemented in the MICE package.
 
 In short, the algorithm follows these steps
 

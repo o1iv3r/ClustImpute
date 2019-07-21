@@ -1,10 +1,10 @@
 Package: ClustImpute
 Type: Package
-Title: What the Package Does (Title Case)
+Title: K-means clustering with build-in missing data imputation
 Version: 0.1.2
 Author: Oliver Pfaffel
 Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
-Description: This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased.
+Description: This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased. See the vignette for details.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -12,7 +12,8 @@ Imports:
     ClusterR,
     copula,
     dplyr,
-    magrittr
+    magrittr,
+    rlang
 Suggests: 
     psych,
     ggplot2,
@@ -23,7 +24,8 @@ Suggests:
     Hmisc,
     tictoc,
     spelling,
-    corrplot
+    corrplot,
+    covr
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 Language: en-US

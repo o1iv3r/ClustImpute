@@ -1,0 +1,24 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+cache: packages
+
+before_install:
+  - sudo apt-get install libgsl0-dev libgsl0ldbl
+
+r:
+  - oldrel
+  - release
+  - devel
+
+r_github_packages:
+  - r-lib/covr
+  - cran/gsl
+
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
+branches:
+  only:
+  - master
