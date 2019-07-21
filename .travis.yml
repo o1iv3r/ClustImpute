@@ -11,5 +11,11 @@ r:
 r_github_packages:
   - r-lib/covr
 
+r_packages:
+  - libgsl0-dev
+
+r_binary_packages:
+  - copula
+
 after_success:
   - Rscript -e 'covr::codecov()'
