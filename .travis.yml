@@ -3,16 +3,15 @@
 language: R
 cache: packages
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install gsl-bin libgsl2 libgsl-dev r-cran-rmpi
+
 r:
   - release
 
 r_github_packages:
   - r-lib/covr
-
-addons:
-  apt:
-    packages:
-    - libcurl4-openssl-dev
 
 after_success:
   - Rscript -e 'covr::codecov()'
