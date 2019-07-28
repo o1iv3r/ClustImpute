@@ -56,7 +56,7 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
     idx_sample_from <- which(mis_ind[,j]==FALSE) # sample from not missing
     sample_len <- dim(X[mis_ind[,j]==TRUE, ])[1] # nr missings = nr of required draws
     set.seed(seed_nr)
-    sampled_idx <- sample(idx_sample_from,size=sample_len,replace=T)
+    sampled_idx <- sample(idx_sample_from,size=sample_len,replace=TRUE)
     X[mis_ind[,j]==TRUE,j] <- X[sampled_idx,j] # overwrite old with new draws
   }
 
@@ -91,13 +91,13 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
     for (i in 1:max(pred)) { # cluster i
       for (j in 1:dim(X)[2]) { # variable j
         idx_sample_from <- which(pred==i & mis_ind[,j]==FALSE) # sample from not missing
-        if (length(idx_sample_from)==0) { # take donors from all clusters if there are non in the current cluster
+        if (length(idx_sample_from)==0) { # take donors from all clusters if there are none in the current cluster
           idx_sample_from <- which(mis_ind[,j]==FALSE) # sample from not missing
         }
         sample_len <- dim(X[pred==i & mis_ind[,j]==TRUE, ])[1] # nr missings = nr of required draws
         if (sample_len>0) {
           set.seed(2*seed_nr+n)
-          sampled_idx <- sample(idx_sample_from,size=sample_len,replace=T)
+          sampled_idx <- sample(idx_sample_from,size=sample_len,replace=TRUE)
           X[pred==i & mis_ind[,j]==TRUE,j] <- X[sampled_idx,j] # overwrite old with new draws
         }
       }
@@ -159,11 +159,23 @@ default_wf <- function(n,n_end=10) {
 #' @param ... additional arguments affecting the predictions produced - not currently used
 #' @return integer value (cluster assignment)
 #' @examples
-#' \dontrun{
-#' # cf. help for ClustImpute
+#'# Random Dataset
+#'set.seed(739)
+#'n <- 750 # numer of points
+#'nr_other_vars <- 2
+#'mat <- matrix(rnorm(nr_other_vars*n),n,nr_other_vars)
+#'me<-4 # mean
+#'x <- c(rnorm(n/3,me/2,1),rnorm(2*n/3,-me/2,1))
+#'y <- c(rnorm(n/3,0,1),rnorm(n/3,me,1),rnorm(n/3,-me,1))
+#'dat <- cbind(mat,x,y)
+#'dat<- as.data.frame(scale(dat)) # scaling
+#'
+#'# Create NAs
+#'dat_with_miss <- miss_sim(dat,p=.1,seed_nr=120)
+#'
 #' res <- ClustImpute(dat_with_miss,nr_cluster=3)
 #' predict(res,newdata=dat[1,])
-#' }
+#'
 #'
 #' @rdname predict
 #' @export
@@ -181,11 +193,23 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 #' @param clusterObj Object of class kmeans_ClustImpute
 #' @return integer value typically between 0 and 1
 #' @examples
-#' \dontrun{
-#' # cf. help for ClustImpute
-#' res <- ClustImpute(dat_with_miss,nr_cluster=3)
-#' var_reduction(res)
-#' }
+#'
+#'# Random Dataset
+#'set.seed(739)
+#'n <- 750 # numer of points
+#'nr_other_vars <- 2
+#'mat <- matrix(rnorm(nr_other_vars*n),n,nr_other_vars)
+#'me<-4 # mean
+#'x <- c(rnorm(n/3,me/2,1),rnorm(2*n/3,-me/2,1))
+#'y <- c(rnorm(n/3,0,1),rnorm(n/3,me,1),rnorm(n/3,-me,1))
+#'dat <- cbind(mat,x,y)
+#'dat<- as.data.frame(scale(dat)) # scaling
+#'
+#'# Create NAs
+#'dat_with_miss <- miss_sim(dat,p=.1,seed_nr=120)
+#'
+#'res <- ClustImpute(dat_with_miss,nr_cluster=3)
+#'var_reduction(res)
 #'
 #' @export
 var_reduction <- function(clusterObj) {

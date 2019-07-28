@@ -34,7 +34,7 @@ miss_sim <- function(dat,p=.2,type="MAR",seed_nr=123) {
   myCop <- copula::normalCopula(param=cor_matrix, dim , dispstr = "un")
 
   # specify binomial marginals
-  myMvd <- copula::mvdc(copula=myCop, margins=c("binom"), marginsIdentical = T, paramMargins=list(list(size=1,prob=p)) )
+  myMvd <- copula::mvdc(copula=myCop, margins=c("binom"), marginsIdentical = TRUE, paramMargins=list(list(size=1,prob=p)) )
 
   # simulate from distribution to obtain missing indicator
   mis_ind <- copula::rMvdc(dim(dat)[1], myMvd)
