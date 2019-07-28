@@ -16,10 +16,22 @@ integer value typically between 0 and 1
 Computes one minus the ratio of the sum of all within cluster variances by the overall variance
 }
 \examples{
-\dontrun{
-# cf. help for ClustImpute
+
+# Random Dataset
+set.seed(739)
+n <- 750 # numer of points
+nr_other_vars <- 2
+mat <- matrix(rnorm(nr_other_vars*n),n,nr_other_vars)
+me<-4 # mean
+x <- c(rnorm(n/3,me/2,1),rnorm(2*n/3,-me/2,1))
+y <- c(rnorm(n/3,0,1),rnorm(n/3,me,1),rnorm(n/3,-me,1))
+dat <- cbind(mat,x,y)
+dat<- as.data.frame(scale(dat)) # scaling
+
+# Create NAs
+dat_with_miss <- miss_sim(dat,p=.1,seed_nr=120)
+
 res <- ClustImpute(dat_with_miss,nr_cluster=3)
 var_reduction(res)
-}
 
 }

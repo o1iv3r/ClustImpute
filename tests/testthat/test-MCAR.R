@@ -12,6 +12,10 @@ X <- as.data.frame(matrix(rnorm(2*n),n,2))
 
 Xmiss <- miss_sim(X,p=frac_missing,type="MCAR")
 
+test_that("Error for invalid missing simulation", {
+  expect_error(miss_sim(X,p=frac_missing,type="invalid string"),"Provide valid type")
+})
+
 mean_diff <- sapply(X,mean,na.rm=TRUE)-sapply(Xmiss,mean,na.rm=TRUE)
 
 test_that("MCAR: mean diff", {

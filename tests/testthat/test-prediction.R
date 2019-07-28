@@ -6,7 +6,7 @@ nr_cluster <- 5
 
 # Random data
 X <- as.data.frame(matrix(rnorm(2*n),n,2))
-Xmiss <- miss_sim(X,p=frac_missing,type="MCAR")
+Xmiss <- miss_sim(X,p=frac_missing,type="MAR")
 
 res <- ClustImpute(Xmiss,nr_cluster)
 
