@@ -1,3 +1,7 @@
+# ClustImpute 0.1.4
+
+Slight change in the methodology. Weights are not used for cluster assignment
+
 # ClustImpute 0.1.3
 
 * Full test coverage
