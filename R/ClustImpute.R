@@ -70,21 +70,21 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
     # Use weights to adjust the scale of a variable specifically for each observation
     args_wf <- list(n,n_end)
     weight_matrix <- 1 - mis_ind * do.call(wf, args_wf)
-    X <- weight_matrix*X
+    X_down_weighted <- weight_matrix*X
 
     # perform clustering
     if (n==1) {
-      cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n)
+      cl_new <- ClusterR::KMeans_arma(data=X_down_weighted,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n)
     } else {
       # starting with existing clusters
       cl_old <- cl_new
       class(cl_old) <- "matrix"
-      cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
+      cl_new <- ClusterR::KMeans_arma(data=X_down_weighted,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
                                       CENTROIDS=cl_old, seed_mode="keep_existing")
     }
 
     # predict cluster
-    pred <- ClusterR::predict_KMeans(X,cl_new)
+    pred <- ClusterR::predict_KMeans(X,cl_new) # use X without weight for assignment
     class(pred) <- "integer"
 
     # draw missing values from current cluster

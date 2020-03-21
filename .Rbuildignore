@@ -1,8 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
-^ClustImpute_vs_random_imputation\.png$
-^Median_random_imp\.png$
 ^pkg_pipeline\.R$
 ^\.travis\.yml$
 ^travis\.yml$
