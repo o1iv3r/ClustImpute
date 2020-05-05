@@ -1,6 +1,7 @@
 # ClustImpute 0.1.4
 
-Slight change in the methodology. Weights are not used for cluster assignment
+* There is now a new option assign_with_wf. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment
+* Compatibility with new version of ClustImpute
 
 # ClustImpute 0.1.3
 

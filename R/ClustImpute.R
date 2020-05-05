@@ -9,6 +9,7 @@
 #' @param wf Weight function. linear up to n_end by default
 #' @param n_end Steps until convergence of weight function to 1
 #' @param seed_nr Number for set.seed()
+#' @param assign_with_wf Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
 #'
 #' @return
 #' \describe{
@@ -45,7 +46,7 @@
 #'res$centroids
 #'
 #' @export
-ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519) {
+ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE) {
 
   mis_ind <- is.na(X) # missing indicator
 
@@ -84,8 +85,14 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
     }
 
     # predict cluster
-    pred <- ClusterR::predict_KMeans(X,cl_new) # use X without weight for assignment
-    class(pred) <- "integer"
+    if (assign_with_wf==TRUE) {
+      pred <- ClusterR::predict_KMeans(X_down_weighted,cl_new) # use X without weight for assignment
+      class(pred) <- "integer"
+    } else { # option to assign clusters ignoring the weight
+      pred <- ClusterR::predict_KMeans(X,cl_new) # use X without weight for assignment
+      class(pred) <- "integer"
+    }
+
 
     # draw missing values from current cluster
     for (i in 1:max(pred)) { # cluster i
