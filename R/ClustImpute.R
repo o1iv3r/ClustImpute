@@ -84,6 +84,29 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
                                       CENTROIDS=cl_old, seed_mode="keep_existing")
     }
 
+    # check if new centroids contain duplicates. If so, replace them by randomly drawn centroids
+    flag_dups = duplicated(cl_new)
+    nr_dups <-  sum(flag_dups)
+    while (nr_dups > 0)
+    {
+      suppressWarnings(cl_new <- matrix(cl_new[!apply(cl_new,2,duplicated)],nr_cluster-nr_dups,dim(X)[2])) # keep unique centroids
+      # print(dim(cl_new))
+      # get support for each column and draw uniformly from there
+      sup_min <- apply(X,1,min)
+      sup_max <- apply(X,1,max)
+      set.seed(seed_nr+1)
+      new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
+      for (col in 2:dim(X)[2]) {
+        sup_min <- apply(X,col,min)
+        sup_max <- apply(X,col,max)
+        set.seed(seed_nr+col)
+        new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
+      }
+      cl_new <- rbind(cl_new,new_centroids) # add new to existing centroids
+      flag_dups = duplicated(cl_new)
+      nr_dups <-  sum(flag_dups)
+    }
+
     # predict cluster
     if (assign_with_wf==TRUE) {
       pred <- ClusterR::predict_KMeans(X_down_weighted,cl_new) # use X without weight for assignment
@@ -92,7 +115,6 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
       pred <- ClusterR::predict_KMeans(X,cl_new) # use X without weight for assignment
       class(pred) <- "integer"
     }
-
 
     # draw missing values from current cluster
     for (i in 1:max(pred)) { # cluster i
@@ -125,6 +147,28 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   class(cl_old) <- "matrix"
   cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
                                   CENTROIDS=cl_old, seed_mode="keep_existing")
+
+  # check if new centroids contain duplicates. If so, replace them by randomly drawn centroids
+  flag_dups = duplicated(cl_new)
+  nr_dups <-  sum(flag_dups)
+  while (nr_dups > 0)
+  {
+    suppressWarnings(cl_new <- matrix(cl_new[!apply(cl_new,2,duplicated)],nr_cluster-nr_dups,dim(X)[2])) # keep unique centroids
+    # get support for each column and draw uniformly from there
+    sup_min <- apply(X,1,min)
+    sup_max <- apply(X,1,max)
+    set.seed(seed_nr+1)
+    new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
+    for (col in 2:dim(X)[2]) {
+      sup_min <- apply(X,col,min)
+      sup_max <- apply(X,col,max)
+      set.seed(seed_nr+col)
+      new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
+    }
+    cl_new <- rbind(cl_new,new_centroids) # add new to existing centroids
+    flag_dups = duplicated(cl_new)
+    nr_dups <-  sum(flag_dups)
+  }
 
   # predict cluster one last time on final draws
   pred <- ClusterR::predict_KMeans(X,cl_new)
