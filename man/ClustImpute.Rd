@@ -4,9 +4,16 @@
 \alias{ClustImpute}
 \title{K-means clustering with build-in missing data imputation}
 \usage{
-ClustImpute(X, nr_cluster, nr_iter = 10, c_steps = 1,
-  wf = default_wf, n_end = 10, seed_nr = 150519,
-  assign_with_wf = TRUE)
+ClustImpute(
+  X,
+  nr_cluster,
+  nr_iter = 10,
+  c_steps = 1,
+  wf = default_wf,
+  n_end = 10,
+  seed_nr = 150519,
+  assign_with_wf = TRUE
+)
 }
 \arguments{
 \item{X}{Data frame with only numeric values or NAs}
