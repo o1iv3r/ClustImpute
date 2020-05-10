@@ -22,4 +22,3 @@ after_success:
 branches:
   only:
   - master
-  - dev_normal_assignment
