@@ -3,9 +3,9 @@
 S3method(predict,kmeans_ClustImpute)
 export("%>%")
 export(ClustImpute)
+export(check_replace_dups)
 export(default_wf)
 export(miss_sim)
 export(var_reduction)
 importFrom(magrittr,"%>%")
-
 importFrom(rlang,.data)

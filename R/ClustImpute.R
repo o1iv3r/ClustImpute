@@ -9,6 +9,7 @@
 #' @param wf Weight function. linear up to n_end by default
 #' @param n_end Steps until convergence of weight function to 1
 #' @param seed_nr Number for set.seed()
+#' @param assign_with_wf Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
 #'
 #' @return
 #' \describe{
@@ -45,7 +46,7 @@
 #'res$centroids
 #'
 #' @export
-ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519) {
+ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE) {
 
   mis_ind <- is.na(X) # missing indicator
 
@@ -70,22 +71,30 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
     # Use weights to adjust the scale of a variable specifically for each observation
     args_wf <- list(n,n_end)
     weight_matrix <- 1 - mis_ind * do.call(wf, args_wf)
-    X <- weight_matrix*X
+    X_down_weighted <- weight_matrix*X
 
     # perform clustering
     if (n==1) {
-      cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n)
+      cl_new <- ClusterR::KMeans_arma(data=X_down_weighted,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n)
     } else {
       # starting with existing clusters
       cl_old <- cl_new
       class(cl_old) <- "matrix"
-      cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
+      cl_new <- ClusterR::KMeans_arma(data=X_down_weighted,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
                                       CENTROIDS=cl_old, seed_mode="keep_existing")
     }
 
+    # check new centroids for duplicate rows and replace with random draws if necessary
+    cl_new <- check_replace_dups(centroids = cl_new, X = X_down_weighted, seed = seed_nr)
+
     # predict cluster
-    pred <- ClusterR::predict_KMeans(X,cl_new)
-    class(pred) <- "integer"
+    if (assign_with_wf==TRUE) {
+      pred <- ClusterR::predict_KMeans(X_down_weighted,cl_new) # use X without weight for assignment
+      class(pred) <- "integer"
+    } else { # option to assign clusters ignoring the weight
+      pred <- ClusterR::predict_KMeans(X,cl_new) # use X without weight for assignment
+      class(pred) <- "integer"
+    }
 
     # draw missing values from current cluster
     for (i in 1:max(pred)) { # cluster i
@@ -119,6 +128,9 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
                                   CENTROIDS=cl_old, seed_mode="keep_existing")
 
+  # check new centroids for duplicate rows and replace with random draws if necessary
+  cl_new <- check_replace_dups(centroids = cl_new, X = X_down_weighted, seed = seed_nr)
+
   # predict cluster one last time on final draws
   pred <- ClusterR::predict_KMeans(X,cl_new)
   class(pred) <- "integer"
@@ -130,6 +142,43 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
                    class="kmeans_ClustImpute",nr_iter=nr_iter, c_steps=c_steps, wf=wf, n_end=n_end, seed_nr=seed_nr)
 
   return (res)
+}
+
+
+#' Check and replace duplicate (centroid) rows
+#'
+#' Internal function of ClustImpute: check new centroids for duplicate rows and replace with random draws in this case.
+#'
+#' @param centroids Matrix of centroids
+#' @param X Underlying data matrix (without missings)
+#' @param seed Seed used for random sampling
+#'
+#' @export
+check_replace_dups <- function(centroids, X, seed) {
+  # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
+  dupcliate_rows <- apply(matrix(duplicated(centroids),nrow=dim(centroids)[1],),1,min)
+  # If so, replace them by randomly drawn centroids
+  nr_dups <- sum(dupcliate_rows)
+  while (nr_dups > 0)
+  {
+    # keep unique centroids
+    centroids <- centroids[!dupcliate_rows,]
+    # get support for each column and draw uniformly from there
+    sup_min <- apply(X,1,min)
+    sup_max <- apply(X,1,max)
+    set.seed(seed+1)
+    new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
+    for (col in 2:dim(X)[2]) {
+      sup_min <- apply(X,col,min)
+      sup_max <- apply(X,col,max)
+      set.seed(seed+col)
+      new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
+    }
+    centroids <- rbind(centroids,new_centroids) # add new to existing centroids
+    dupcliate_rows <- apply(matrix(duplicated(centroids),nrow=dim(centroids)[1],),1,min)
+    nr_dups <- sum(dupcliate_rows)
+  }
+  return (centroids)
 }
 
 

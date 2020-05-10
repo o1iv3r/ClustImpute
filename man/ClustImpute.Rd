@@ -4,8 +4,16 @@
 \alias{ClustImpute}
 \title{K-means clustering with build-in missing data imputation}
 \usage{
-ClustImpute(X, nr_cluster, nr_iter = 10, c_steps = 1,
-  wf = default_wf, n_end = 10, seed_nr = 150519)
+ClustImpute(
+  X,
+  nr_cluster,
+  nr_iter = 10,
+  c_steps = 1,
+  wf = default_wf,
+  n_end = 10,
+  seed_nr = 150519,
+  assign_with_wf = TRUE
+)
 }
 \arguments{
 \item{X}{Data frame with only numeric values or NAs}
@@ -21,6 +29,8 @@ ClustImpute(X, nr_cluster, nr_iter = 10, c_steps = 1,
 \item{n_end}{Steps until convergence of weight function to 1}
 
 \item{seed_nr}{Number for set.seed()}
+
+\item{assign_with_wf}{Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.}
 }
 \value{
 \describe{
