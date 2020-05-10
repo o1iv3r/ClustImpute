@@ -84,30 +84,8 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
                                       CENTROIDS=cl_old, seed_mode="keep_existing")
     }
 
-    # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
-    dupcliate_rows <- apply(matrix(duplicated(cl_new),nrow=dim(cl_new)[1],),1,min)
-    # If so, replace them by randomly drawn centroids
-    nr_dups <- sum(dupcliate_rows)
-    while (nr_dups > 0)
-    {
-      # keep unique centroids
-      # suppressWarnings(cl_new <- matrix(cl_new[!apply(cl_new,2,duplicated)],nr_cluster-nr_dups,dim(X)[2]))
-      cl_new <- cl_new[!dupcliate_rows,]
-      # get support for each column and draw uniformly from there
-      sup_min <- apply(X,1,min)
-      sup_max <- apply(X,1,max)
-      set.seed(seed_nr+1)
-      new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
-      for (col in 2:dim(X)[2]) {
-        sup_min <- apply(X,col,min)
-        sup_max <- apply(X,col,max)
-        set.seed(seed_nr+col)
-        new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
-      }
-      cl_new <- rbind(cl_new,new_centroids) # add new to existing centroids
-      dupcliate_rows <- apply(matrix(duplicated(cl_new),nrow=dim(cl_new)[1],),1,min)
-      nr_dups <- sum(dupcliate_rows)
-    }
+    # check new centroids for duplicate rows and replace with random draws if necessary
+    cl_new <- check_replace_dups(centroids = cl_new, X = X_down_weighted, seed = seed_nr)
 
     # predict cluster
     if (assign_with_wf==TRUE) {
@@ -150,30 +128,8 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   cl_new <- ClusterR::KMeans_arma(data=X,clusters=nr_cluster,n_iter=c_steps,seed=seed_nr+n,
                                   CENTROIDS=cl_old, seed_mode="keep_existing")
 
-  # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
-  dupcliate_rows <- apply(matrix(duplicated(cl_new),nrow=dim(cl_new)[1],),1,min)
-  # If so, replace them by randomly drawn centroids
-  nr_dups <- sum(dupcliate_rows)
-  while (nr_dups > 0)
-  {
-    # keep unique centroids
-    # suppressWarnings(cl_new <- matrix(cl_new[!apply(cl_new,2,duplicated)],nr_cluster-nr_dups,dim(X)[2]))
-    cl_new <- cl_new[!dupcliate_rows,]
-    # get support for each column and draw uniformly from there
-    sup_min <- apply(X,1,min)
-    sup_max <- apply(X,1,max)
-    set.seed(seed_nr+1)
-    new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
-    for (col in 2:dim(X)[2]) {
-      sup_min <- apply(X,col,min)
-      sup_max <- apply(X,col,max)
-      set.seed(seed_nr+col)
-      new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
-    }
-    cl_new <- rbind(cl_new,new_centroids) # add new to existing centroids
-    dupcliate_rows <- apply(matrix(duplicated(cl_new),nrow=dim(cl_new)[1],),1,min)
-    nr_dups <- sum(dupcliate_rows)
-  }
+  # check new centroids for duplicate rows and replace with random draws if necessary
+  cl_new <- check_replace_dups(centroids = cl_new, X = X_down_weighted, seed = seed_nr)
 
   # predict cluster one last time on final draws
   pred <- ClusterR::predict_KMeans(X,cl_new)
@@ -186,6 +142,43 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
                    class="kmeans_ClustImpute",nr_iter=nr_iter, c_steps=c_steps, wf=wf, n_end=n_end, seed_nr=seed_nr)
 
   return (res)
+}
+
+
+#' Check and replace duplicate (centroid) rows
+#'
+#' Internal function of ClustImpute: check new centroids for duplicate rows and replace with random draws in this case.
+#'
+#' @param centroids Matrix of centroids
+#' @param X Underlying data matrix (without missings)
+#' @param seed Seed used for random sampling
+#'
+#' @export
+check_replace_dups <- function(centroids, X, seed) {
+  # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
+  dupcliate_rows <- apply(matrix(duplicated(centroids),nrow=dim(centroids)[1],),1,min)
+  # If so, replace them by randomly drawn centroids
+  nr_dups <- sum(dupcliate_rows)
+  while (nr_dups > 0)
+  {
+    # keep unique centroids
+    centroids <- centroids[!dupcliate_rows,]
+    # get support for each column and draw uniformly from there
+    sup_min <- apply(X,1,min)
+    sup_max <- apply(X,1,max)
+    set.seed(seed+1)
+    new_centroids <-  matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1)
+    for (col in 2:dim(X)[2]) {
+      sup_min <- apply(X,col,min)
+      sup_max <- apply(X,col,max)
+      set.seed(seed+col)
+      new_centroids <- cbind(new_centroids, matrix(stats::runif(nr_dups,sup_min,sup_max),nr_dups,1))
+    }
+    centroids <- rbind(centroids,new_centroids) # add new to existing centroids
+    dupcliate_rows <- apply(matrix(duplicated(centroids),nrow=dim(centroids)[1],),1,min)
+    nr_dups <- sum(dupcliate_rows)
+  }
+  return (centroids)
 }
 
 
