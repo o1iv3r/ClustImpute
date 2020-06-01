@@ -6,6 +6,16 @@ cache: packages
 before_install:
   - sudo apt-get install libgsl0-dev
 
+# new
+addons:
+  apt:
+    packages:
+      - libgsl-dev
+install:
+  - R -e 'install.packages("devtools")'
+  - R -e 'devtools::install(dependencies = TRUE, upgrade_dependencies = TRUE)'
+# end new
+
 r:
   - oldrel
   - release
