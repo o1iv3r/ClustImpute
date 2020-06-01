@@ -4,7 +4,7 @@ language: R
 cache: packages
 
 before_install:
-  - sudo apt-get install libgsl23 libgslcblas0 libgsl0-dev
+  - sudo apt-get install libgsl0-dev
 
 r:
   - oldrel
