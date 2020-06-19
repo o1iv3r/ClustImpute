@@ -2,17 +2,17 @@
 
 language: R
 cache: packages
-# warnings_are_errors: false
+warnings_are_errors: false # tex on travis R-dev produces lots of warnings
 
 before_install:
 #  - sudo apt-get install libgsl0-dev libgsl2
   - sudo apt-get update
   - sudo apt install libgsl-dev
 
-env:
-  global:
-    - ALLOWED_WARNINGS = 3 # these come from travis
-    - ALLOWED_NOTES = 3
+# env:
+#  global:
+#    - ALLOWED_WARNINGS = 3 
+#    - ALLOWED_NOTES = 3
 
 r:
   - oldrel
