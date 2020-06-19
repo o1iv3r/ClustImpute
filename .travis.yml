@@ -2,12 +2,17 @@
 
 language: R
 cache: packages
-warnings_are_errors: false
+# warnings_are_errors: false
 
 before_install:
 #  - sudo apt-get install libgsl0-dev libgsl2
   - sudo apt-get update
   - sudo apt install libgsl-dev
+
+env:
+  global:
+    - ALLOWED_WARNINGS = 1
+    - ALLOWED_NOTES = 1
 
 r:
   - oldrel
