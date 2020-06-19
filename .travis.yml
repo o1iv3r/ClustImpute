@@ -11,8 +11,8 @@ before_install:
 
 env:
   global:
-    - ALLOWED_WARNINGS = 1
-    - ALLOWED_NOTES = 1
+    - ALLOWED_WARNINGS = 3 # these come from travis
+    - ALLOWED_NOTES = 3
 
 r:
   - oldrel
