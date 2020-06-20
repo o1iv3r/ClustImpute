@@ -1,7 +1,7 @@
 # ClustImpute (development version)
 
 * Only relevant functions are exported
-* Seed for random imputation changes with iteration variables
+* Seed for random imputation changes with iteration variables. For this reason previous results may change slightly.
 * Full test coverage
 
 # ClustImpute 0.1.4

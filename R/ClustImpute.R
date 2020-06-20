@@ -193,6 +193,7 @@ check_replace_dups <- function(centroids, X, seed) {
 #' x <- 0:20
 #' plot(x,1-default_wf(x))
 #'
+#' @export
 default_wf <- function(n,n_end=10) {
   y <- 1-pmin(n/n_end,1)
   return(y)
@@ -257,6 +258,8 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 #'
 #'res <- ClustImpute(dat_with_miss,nr_cluster=3)
 #'var_reduction(res)
+#'
+#'@importFrom rlang .data
 #'
 #' @export
 var_reduction <- function(clusterObj) {
