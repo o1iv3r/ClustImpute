@@ -1,6 +1,6 @@
 # ClustImpute
 
-# ggplot2 <img src="man/figures/logo.png" align="right" width="120" />
+# <img src="man/figures/logo.png" align="right" width="90" />
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.org/o1iv3r/ClustImpute)
