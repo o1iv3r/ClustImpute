@@ -9,9 +9,13 @@ X <- as.data.frame(matrix(rnorm(2*n),n,2))
 Xmiss <- miss_sim(X,p=frac_missing,type="MAR")
 
 res <- ClustImpute(Xmiss,nr_cluster)
-
 test_that("Prediction function on complete_data return the final cluster assignment", {
   expect_equal(predict(res,newdata = res$complete_data), res$clusters)
+})
+
+res2 <- ClustImpute(Xmiss,nr_cluster,assign_with_wf=FALSE)
+test_that("Prediction function on complete_data return the final cluster assignment 2", {
+  expect_equal(predict(res2,newdata = res2$complete_data), res2$clusters)
 })
 
 # quick and dirty using dplyr and nndist

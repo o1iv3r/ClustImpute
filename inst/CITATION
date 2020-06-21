@@ -1,0 +1,12 @@
+citHeader("To cite ClustImpute in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "ClustImpute: an R package for k-means clustering with build-in missing data imputation",
+  author   = "Oliver Pfaffel",
+  journal  = "Preprint",
+  year     = "2020",
+  doi = "10.13140/RG.2.2.20143.36007",
+  url      = "https://www.researchgate.net/publication/341881683_CLUSTIMPUTE_AN_R_PACKAGE_FOR_K-MEANS_CLUSTERING_WITH_BUILD-IN_MISSING_DATA_IMPUTATION",
+  textVersion = "Oliver Pfaffel (2020). ClustImpute: an R package for k-means clustering with build-in missing data imputation. <doi:10.13140/RG.2.2.20143.36007>"
+)

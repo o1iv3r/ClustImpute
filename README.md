@@ -1,5 +1,7 @@
 # ClustImpute
 
+# <img src="man/figures/logo.png" align="right" width="90" />
+
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.org/o1iv3r/ClustImpute)
 [![Codecov test coverage](https://codecov.io/gh/o1iv3r/ClustImpute/branch/master/graph/badge.svg)](https://codecov.io/gh/o1iv3r/ClustImpute?branch=master)
@@ -27,7 +29,8 @@ ClustImpute draws missing values iteratively based on the current cluster assign
 You can install the released version of ClustImpute with:
 
 ``` r
-# install.packages("ClustImpute") # not on CRAN at the moment
+# from CRAN
+install.packages("ClustImpute")
 
 # from github
 devtools::install_github("o1iv3r/ClustImpute")

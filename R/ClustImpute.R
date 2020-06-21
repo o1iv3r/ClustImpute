@@ -56,7 +56,7 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   for (j in 1:dim(X)[2]) { # variable j
     idx_sample_from <- which(mis_ind[,j]==FALSE) # sample from not missing
     sample_len <- dim(X[mis_ind[,j]==TRUE, ])[1] # nr missings = nr of required draws
-    set.seed(seed_nr)
+    set.seed(seed_nr+j)
     sampled_idx <- sample(idx_sample_from,size=sample_len,replace=TRUE)
     X[mis_ind[,j]==TRUE,j] <- X[sampled_idx,j] # overwrite old with new draws
   }
@@ -96,7 +96,7 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
       class(pred) <- "integer"
     }
 
-    # draw missing values from current cluster
+    # draw missing values from current cluster: random imputation
     for (i in 1:max(pred)) { # cluster i
       for (j in 1:dim(X)[2]) { # variable j
         idx_sample_from <- which(pred==i & mis_ind[,j]==FALSE) # sample from not missing
@@ -105,7 +105,7 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
         }
         sample_len <- dim(X[pred==i & mis_ind[,j]==TRUE, ])[1] # nr missings = nr of required draws
         if (sample_len>0) {
-          set.seed(2*seed_nr+n)
+          set.seed(seed_nr+n+i+j)
           sampled_idx <- sample(idx_sample_from,size=sample_len,replace=TRUE)
           X[pred==i & mis_ind[,j]==TRUE,j] <- X[sampled_idx,j] # overwrite old with new draws
         }
@@ -153,7 +153,6 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
 #' @param X Underlying data matrix (without missings)
 #' @param seed Seed used for random sampling
 #'
-#' @export
 check_replace_dups <- function(centroids, X, seed) {
   # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
   dupcliate_rows <- apply(matrix(duplicated(centroids),nrow=dim(centroids)[1],),1,min)
@@ -259,6 +258,8 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 #'
 #'res <- ClustImpute(dat_with_miss,nr_cluster=3)
 #'var_reduction(res)
+#'
+#'@importFrom rlang .data
 #'
 #' @export
 var_reduction <- function(clusterObj) {

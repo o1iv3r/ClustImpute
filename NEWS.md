@@ -1,3 +1,10 @@
+# ClustImpute 0.1.5
+
+* Only relevant functions are exported
+* Seed for random imputation changes with iteration variables. For this reason previous results may change slightly.
+* Full test coverage
+* Added citation
+
 # ClustImpute 0.1.4
 
 * There is now a new option assign_with_wf. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment
