@@ -49,12 +49,8 @@ use_test("var_reduction")
 use_git() # git remote add origin https://github.com/o1iv3r/ClustImpute.git
 # use_github()
 
-## If article or other reference exists
-# use_citation()
-
 ## Build ignore --> CRAN notes
 use_build_ignore(c("pkg_pipeline.R"))
-
 
 ## Citation
 use_citation()
@@ -74,12 +70,6 @@ devtools::test()
 devtools::spell_check()
 devtools::document()
 devtools::check(document = FALSE)
-
-# add manually to namespace
-# importFrom(rlang,.data)
-
-# Further checks on different machines
-devtools::check_rhub()
 
 # finally, either release
 devtools::release()
