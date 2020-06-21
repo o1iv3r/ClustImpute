@@ -1,7 +1,7 @@
 Package: ClustImpute
 Type: Package
 Title: K-means clustering with build-in missing data imputation
-Version: 0.1.4.9000
+Version: 0.1.5
 Author: Oliver Pfaffel
 Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
 Description: This clustering algorithm deals with missing data via weights that are imposed on missings and successively increased. See the vignette for details.

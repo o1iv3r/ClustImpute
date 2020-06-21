@@ -52,8 +52,12 @@ use_git() # git remote add origin https://github.com/o1iv3r/ClustImpute.git
 ## If article or other reference exists
 # use_citation()
 
-## Build ignore
+## Build ignore --> CRAN notes
 use_build_ignore(c("pkg_pipeline.R"))
+
+
+## Citation
+use_citation()
 
 #### Before ANY changes are made ####
 
