@@ -1,0 +1,9 @@
+%\VignetteIndexEntry{Description of the algorithm}
+%\VignetteAuthor{Oliver Pfaffel}
+
+\documentclass{article}
+\usepackage{pdfpages}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\includepdf[pages=-, fitpaper=true]{ClustImpute_description.pdf}
+\end{document}
