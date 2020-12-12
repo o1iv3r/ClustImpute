@@ -85,3 +85,9 @@ use_build_ignore("travis.yml")
 
 use_coverage()
 use_build_ignore("codecov.yml")
+
+
+#### Tinytex ####
+
+# Installing latex packages
+tinytex::tlmgr_install("pdfpages")

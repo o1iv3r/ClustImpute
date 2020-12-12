@@ -1,3 +1,7 @@
+# ClustImpute 0.1.6
+
+* Added vignette that describes the algorithm in more detail.
+
 # ClustImpute 0.1.5
 
 * Only relevant functions are exported
