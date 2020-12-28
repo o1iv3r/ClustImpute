@@ -3,7 +3,7 @@
 # <img src="man/figures/logo.png" align="right" width="90" />
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.org/o1iv3r/ClustImpute)
+[![Travis build status](https://travis-ci.com/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.com/o1iv3r/ClustImpute)
 [![Codecov test coverage](https://codecov.io/gh/o1iv3r/ClustImpute/branch/master/graph/badge.svg)](https://codecov.io/gh/o1iv3r/ClustImpute?branch=master)
 ![CRAN_Version](https://www.r-pkg.org/badges/version-last-release/ClustImpute)
 ![CRAN_Downloads](https://cranlogs.r-pkg.org/badges/grand-total/ClustImpute)
