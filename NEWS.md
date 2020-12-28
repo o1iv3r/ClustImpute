@@ -1,3 +1,8 @@
+# ClustImpute 0.1.7
+
+* Removed dependency from psych package.
+* Added marginal plots to the vignette via ggExtra.
+
 # ClustImpute 0.1.6
 
 * Added vignette that describes the algorithm in more detail.
