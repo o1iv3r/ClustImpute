@@ -1,3 +1,7 @@
+# ClustImpute 0.1.7
+
+* Removed dependency from psych package.
+
 # ClustImpute 0.1.6
 
 * Added vignette that describes the algorithm in more detail.

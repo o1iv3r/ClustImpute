@@ -43,11 +43,16 @@ dat<- as.data.frame(scale(dat)) # scaling
 summary(dat)
 ```
 
-One can clearly see the three clusters
+One can clearly see the three clusters of the randomly generated data:
 
 ```{r}
-plot(dat$x,dat$y)
+library(ggExtra)
+dat4plot <- dat
+dat4plot$true_clust_fct <- factor(true_clust)
+p_base <- ggplot(dat4plot,aes(x=x,y=y,color=true_clust_fct)) + geom_point()
+ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
 ```
+
 
 We create a 20% missings using a custom function
 
@@ -67,7 +72,7 @@ corrplot(cor(mis_ind),method="number")
 # Median or random imputation
 
 
-Clearly, an imputation with the median value does a pretty bad job here:
+Clearly, an imputation with the median value does a pretty bad job here. All imputed values lie on either of the two axes thereby completely distorting the marginal distributions:
 
 ```{r}
 dat_median_imp <- dat_with_miss
@@ -75,11 +80,11 @@ for (j in 1:dim(dat)[2]) {
   dat_median_imp[,j] <- Hmisc::impute(dat_median_imp[,j],fun=median)
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
-ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
+p_median_imp <- ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
+ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
-
-But also a random imputation is not much better: it creates plenty of points in areas with no data
+But also a random imputation is not much better: it creates plenty of points in areas with no data. Note how a simple check of the marginal distributions would not reveal this issue!
 
 ```{r}
 dat_random_imp <- dat_with_miss
@@ -87,17 +92,19 @@ for (j in 1:dim(dat)[2]) {
   dat_random_imp[,j] <- impute(dat_random_imp[,j],fun="random")
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
-ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
+p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
+ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
-A cluster base on random imputation will thus not provide good results (even if we "know" the number of clusters)
+A cluster base on random imputation will thus not provide good results (even if we "know" the number of clusters, which is 3 in this case). Note how the marginal distribution for y differs from the first chart of this vignette where we show the true clusters instead of the predicted clusters from a random imputation.
 
 ```{r}
 tic("Clustering based on random imputation")
 cl_compare <- KMeans_arma(data=dat_random_imp,clusters=3,n_iter=100,seed=751)
 toc()
 dat_random_imp$pred <- predict_KMeans(dat_random_imp,cl_compare)
-ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
+p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
+ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
 
@@ -131,10 +138,11 @@ ClustImpute provides several results:
 str(res)
 ```
 
-We'll first look at the complete data and clustering results. Quite obviously, it gives better results then median / random imputation.
+We'll first look at the complete data and clustering results. Quite obviously, it gives better results than median / random imputation.
 
 ```{r}
-ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
+p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
+ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
 ```
 
 Packages like MICE compute a traceplot of mean and variance for various chain. Here we only have a single realization  and thus re-run ClustImpute with various seeds to obtain different realizations. 
@@ -162,27 +170,6 @@ ggplot(as.data.frame(sd_all)) + geom_line(aes(x=iter,y=V1,color=factor(seed))) +
 
 
 # Quality of imputation and cluster results
-
-## Marginal distributions
-
-We compare marginal distributions using a violin plot of x and y
-
-```{r}
-dat4plot <- dat
-dat4plot$true_clust <- true_clust
-Xfinal <- res$complete_data
-Xfinal$pred <- res$clusters
-
-par(mfrow=c(1,2))
-violinBy(dat4plot,"x","true_clust",main="Original data")
-violinBy(dat4plot,"y","true_clust",main="Original data")
-violinBy(Xfinal,"x","pred",main="imputed data")
-violinBy(Xfinal,"y","pred",main="imputed data")
-violinBy(dat_random_imp,"x","pred",main="random imputation")
-violinBy(dat_random_imp,"y","pred",main="random imputation")
-```
-
-In particular for y the distribution by cluster is quite far away from the original distribution for the random imputation based clustering.
 
 ## External validation: rand index
 
