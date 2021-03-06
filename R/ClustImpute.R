@@ -236,48 +236,59 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 
 #' Plot showing marginal distribution by cluster assignment
 #'
-#' @param x an object returned from ClustImpute
-#' @param type either "jitter" or "bar"
-#' @param ... arguments to be passed to base plot method
+#' Returns a plot with the marginal distributions by cluster and feature. The plot is a ggplot object an can therefore be further modified.
 #'
+#' @param x an object returned from ClustImpute
+#' @param type either "hist" to plot a histogram or "box" for a boxplot
+#' @param vline for "hist" a vertical line is plotted showing either the centroid value or the mean of all data points grouped by cluster and feature
+#' @param hist_bins number of bins for histogram
+#' @param color_bins color for the histogram bins
+#' @param color_vline color for the vertical line
+#' @param size_vline size of the vertical line
+#' @param ... currently unused
+#' @return Returns a ggplot object
 #' @rdname plot
 #' @export
-plot.kmeans_ClustImpute <- function(x,type="jitter",xlimits=c(NA,NA),...) {
-  # todo add package reference with ::
-  # todo import tidyverse or only tidy r, dplyr and ggplot2
-
+plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30,color_bins="#56B4E9",color_vline="#E69F00",size_vline=2,...) {
   complete_data <- x$complete_data
-  feature_names <-  names(x$complete_data)
-  complete_data$cluster <- x$clusters
+  complete_data$Cluster <- x$cluster
   # reshape data for ggplot
-  data4plot <-  complete_data %>% pivot_longer(!cluster, names_to = "Features", values_to = "value")
+  data4plot <-  complete_data %>% tidyr::pivot_longer(!Cluster, names_to = "Feature", values_to = "value")
 
   if (type=="hist") {
-    dataLine <- data4plot %>%
-      group_by(cluster,Features) %>%
-      summarize(mean_x = mean(value)) # todo warning
-
-
-    # ggplot(data4plot, aes(x = value, y = Features)) + geom_jitter() +
-    #   facet_grid(~cluster) + geom_vline(data=dataLine,aes(xintercept=mean_x,color=Features))
-
-    # todo binwidth
-    ggplot(data4plot) + geom_histogram(aes(x = value), bins=30) +
-      facet_grid(Features~cluster) + geom_vline(data=dataLine,aes(xintercept=mean_x))
-
-    # todo xlim
-
-  } else if (type="box") {
-    ggplot(data4plot, aes(x = value, y = Features)) + geom_boxplot() + facet_grid(~cluster)
-
-  }
-  # todo theme
-  # todo bar plot for centroids only
-
-  }
-
+    # get value for vertical line
+    if (vline=="centroids") {
+      dataLine <- centroids_tidy_format(x)
+    } else if (vline=="mean") {
+      dataLine <- data4plot %>%
+        dplyr::group_by(Cluster,Feature) %>%
+        dplyr::summarize(value = stats::mean(value))
+    } else stop("vline must be either 'centroids' or 'mean'")
+    p <- ggplot2::ggplot(data4plot) + ggplot2::geom_histogram(ggplot2::aes(x = value), bins=hist_bins, fill=color_bins) +
+      ggplot2::facet_grid(Feature~Cluster,labeller = ggplot2::label_both) +
+      ggplot2::geom_vline(data=dataLine,ggplot2::aes(xintercept=value),size=size_vline,color=color_vline) + ggplot2::theme_light()
+  } else if (type=="box") {
+    p <- ggplot2::ggplot(data4plot, ggplot2::aes(x = value, y = Feature)) + ggplot2::geom_boxplot() +
+      ggplot2::facet_grid(~Cluster,labeller = ggplot2::label_both) +  ggplot2::theme_classic()
+  } else stop("type must bei either 'hist' or 'box'")
 
   return(p)
+}
+
+
+#' Convert centroids matrix into tidy format
+#'
+#' A helper function for plot() but may be useful for further post-processing of clustering results.
+#'
+#' @param x an object returned by ClustImpute
+#' @return data frame with three columns ( cluster | Features | value ) that uniquely defines the centroids#'
+#' @export
+centroids_tidy_format <- function(x) {
+  cen <- as.data.frame(x$centroids)
+  names(cen) <- names(x$complete_data)
+  cen$Cluster <- 1:dim(cen)[1]
+  cen <- cen %>% tidyr::pivot_longer(!Cluster, names_to = "Feature", values_to = "value")
+  return(cen)
 }
 
 

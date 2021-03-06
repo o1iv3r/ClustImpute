@@ -49,10 +49,24 @@ library(ClustImpute)
 ClustImpute(X,nr_cluster)
 ```
 
-However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette
+However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette. 
 
 ``` r
 vignette("Example_on_simulated_data")
+```
+
+Also, in most cases it is recommended to center and scale the input data frame before clustering
+
+``` r
+X_scaled = scale(X)
+ClustImpute(X_scaled,nr_cluster)
+```
+
+or, in case the data shall be clustered uncentered, to turn of the down-weighting of the random imputations:
+
+
+``` r
+ClustImpute(X,nr_cluster,n_end=1)
 ```
 
 ## Details on ClustImpute

@@ -13,7 +13,8 @@ Imports:
     copula,
     dplyr,
     magrittr,
-    tidyverse,
+    tidyr,
+    ggplot2,
     rlang
 Suggests: 
     ggExtra,
