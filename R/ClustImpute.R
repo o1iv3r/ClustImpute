@@ -234,6 +234,53 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 }
 
 
+#' Plot showing marginal distribution by cluster assignment
+#'
+#' @param x an object returned from ClustImpute
+#' @param type either "jitter" or "bar"
+#' @param ... arguments to be passed to base plot method
+#'
+#' @rdname plot
+#' @export
+plot.kmeans_ClustImpute <- function(x,type="jitter",xlimits=c(NA,NA),...) {
+  # todo add package reference with ::
+  # todo import tidyverse or only tidy r, dplyr and ggplot2
+
+  complete_data <- x$complete_data
+  feature_names <-  names(x$complete_data)
+  complete_data$cluster <- x$clusters
+  # reshape data for ggplot
+  data4plot <-  complete_data %>% pivot_longer(!cluster, names_to = "Features", values_to = "value")
+
+  if (type=="hist") {
+    dataLine <- data4plot %>%
+      group_by(cluster,Features) %>%
+      summarize(mean_x = mean(value)) # todo warning
+
+
+    # ggplot(data4plot, aes(x = value, y = Features)) + geom_jitter() +
+    #   facet_grid(~cluster) + geom_vline(data=dataLine,aes(xintercept=mean_x,color=Features))
+
+    # todo binwidth
+    ggplot(data4plot) + geom_histogram(aes(x = value), bins=30) +
+      facet_grid(Features~cluster) + geom_vline(data=dataLine,aes(xintercept=mean_x))
+
+    # todo xlim
+
+  } else if (type="box") {
+    ggplot(data4plot, aes(x = value, y = Features)) + geom_boxplot() + facet_grid(~cluster)
+
+  }
+  # todo theme
+  # todo bar plot for centroids only
+
+  }
+
+
+  return(p)
+}
+
+
 #' Reduction of variance
 #'
 #' Computes one minus the ratio of the sum of all within cluster variances by the overall variance
