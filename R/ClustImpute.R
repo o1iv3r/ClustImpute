@@ -253,7 +253,7 @@ plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30
   complete_data <- x$complete_data
   complete_data$Cluster <- x$cluster
   # reshape data for ggplot
-  data4plot <-  complete_data %>% tidyr::pivot_longer(!Cluster, names_to = "Feature", values_to = "value")
+  data4plot <-  complete_data %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
 
   if (type=="hist") {
     # get value for vertical line
@@ -261,15 +261,15 @@ plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30
       dataLine <- centroids_tidy_format(x)
     } else if (vline=="mean") {
       dataLine <- data4plot %>%
-        dplyr::group_by(Cluster,Feature) %>%
-        dplyr::summarize(value = stats::mean(value))
+        dplyr::group_by(.data$Cluster,.data$Feature) %>%
+        dplyr::summarize(value = mean(.data$value))
     } else stop("vline must be either 'centroids' or 'mean'")
-    p <- ggplot2::ggplot(data4plot) + ggplot2::geom_histogram(ggplot2::aes(x = value), bins=hist_bins, fill=color_bins) +
-      ggplot2::facet_grid(Feature~Cluster,labeller = ggplot2::label_both) +
-      ggplot2::geom_vline(data=dataLine,ggplot2::aes(xintercept=value),size=size_vline,color=color_vline) + ggplot2::theme_light()
+    p <- ggplot2::ggplot(data4plot) + ggplot2::geom_histogram(ggplot2::aes(x = .data$value), bins=hist_bins, fill=color_bins) +
+      ggplot2::facet_grid(.data$Feature~.data$Cluster,labeller = ggplot2::label_both) +
+      ggplot2::geom_vline(data=dataLine,ggplot2::aes(xintercept=.data$value),size=size_vline,color=color_vline) + ggplot2::theme_light()
   } else if (type=="box") {
-    p <- ggplot2::ggplot(data4plot, ggplot2::aes(x = value, y = Feature)) + ggplot2::geom_boxplot() +
-      ggplot2::facet_grid(~Cluster,labeller = ggplot2::label_both) +  ggplot2::theme_classic()
+    p <- ggplot2::ggplot(data4plot, ggplot2::aes(x = .data$value, y = .data$Feature)) + ggplot2::geom_boxplot() +
+      ggplot2::facet_grid(~.data$Cluster,labeller = ggplot2::label_both) +  ggplot2::theme_classic()
   } else stop("type must bei either 'hist' or 'box'")
 
   return(p)
@@ -287,7 +287,7 @@ centroids_tidy_format <- function(x) {
   cen <- as.data.frame(x$centroids)
   names(cen) <- names(x$complete_data)
   cen$Cluster <- 1:dim(cen)[1]
-  cen <- cen %>% tidyr::pivot_longer(!Cluster, names_to = "Feature", values_to = "value")
+  cen <- cen %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
   return(cen)
 }
 

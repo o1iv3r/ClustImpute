@@ -1,5 +1,7 @@
 # ClustImpute (development version)
 
+* Added a plot function for ClustImpute results showing marginal distributions by cluster and feature.
+
 # ClustImpute 0.1.7
 
 * Removed dependency from psych package.
