@@ -38,7 +38,8 @@ use_test("only_NAs")
 use_test("dimensions")
 use_test("prediction")
 use_test("var_reduction")
-# use_coverage() # Test coverage
+use_test("plot_fun")
+use_coverage() # Test coverage
 
 ## Package website
 # use_pkgdown() # https://github.com/r-lib/pkgdown

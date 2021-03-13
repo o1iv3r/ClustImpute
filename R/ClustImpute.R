@@ -236,7 +236,7 @@ predict.kmeans_ClustImpute <- function(object,newdata,...) {
 
 #' Plot showing marginal distribution by cluster assignment
 #'
-#' Returns a plot with the marginal distributions by cluster and feature. The plot is a ggplot object an can therefore be further modified.
+#' Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
 #'
 #' @param x an object returned from ClustImpute
 #' @param type either "hist" to plot a histogram or "box" for a boxplot
