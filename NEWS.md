@@ -1,6 +1,9 @@
-# ClustImpute (development version)
+# ClustImpute 0.2.0
 
 * Added a plot function for ClustImpute results showing marginal distributions by cluster and feature. Type histogram and boxplot.
+* Added custom print function
+* Updated vignette showing new functionality
+* Both changes increase dependencies, hence the version bump
 
 # ClustImpute 0.1.7
 

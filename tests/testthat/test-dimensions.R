@@ -14,7 +14,7 @@ test_that("Dimension complete data", {
 
 test_that("Dimension centroits", {
   expect_equal(dim(res$centroids)[1], nr_cluster)
-  expect_equal(dim(res$centroids)[2], dim(X)[2])
+  expect_equal(dim(res$centroids)[2], dim(X)[2]+1)
 })
 
 test_that("Length cluster assignment", {

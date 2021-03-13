@@ -129,11 +129,12 @@ tic("Run ClustImpute")
 res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
 toc()
 ```
+To get an overview of what ClustImpute you may run the following commands:
 
-ClustImpute provides several results:
-
-```{r}
-str(res)
+```{r eval=FALSE}
+res
+summary(res)
+attributes(res)
 ```
 
 We'll first look at the complete data and clustering results. Quite obviously, it gives better results than median / random imputation.

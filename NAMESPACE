@@ -2,9 +2,9 @@
 
 S3method(plot,kmeans_ClustImpute)
 S3method(predict,kmeans_ClustImpute)
+S3method(print,kmeans_ClustImpute)
 export("%>%")
 export(ClustImpute)
-export(centroids_tidy_format)
 export(default_wf)
 export(miss_sim)
 export(var_reduction)

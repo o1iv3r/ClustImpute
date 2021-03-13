@@ -134,11 +134,16 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   # predict cluster one last time on final draws
   pred <- ClusterR::predict_KMeans(X,cl_new)
   class(pred) <- "integer"
+
+  # convert centroids into nice format
   class(cl_new) <- "matrix"
+  centroids <- as.data.frame(cl_new)
+  names(centroids) <- names(X)
+  centroids$Cluster <- 1:dim(centroids)[1]
 
   # return all relevant results
   # parameters are provided as attributes
-  res <- structure(list(complete_data=X,clusters=pred,centroids=cl_new,imp_values_mean=mean_imp,imp_values_sd=sd_imp),
+  res <- structure(list(complete_data=X,clusters=pred,centroids=centroids,centroids_matrix=cl_new,imp_values_mean=mean_imp,imp_values_sd=sd_imp),
                    class="kmeans_ClustImpute",nr_iter=nr_iter, c_steps=c_steps, wf=wf, n_end=n_end, seed_nr=seed_nr)
 
   return (res)
@@ -228,7 +233,7 @@ default_wf <- function(n,n_end=10) {
 #' @rdname predict
 #' @export
 predict.kmeans_ClustImpute <- function(object,newdata,...) {
-  pred <- ClusterR::predict_KMeans(newdata,object$centroids)
+  pred <- ClusterR::predict_KMeans(newdata,object$centroids_matrix)
   class(pred) <- "integer"
   return(pred)
 }
@@ -258,7 +263,7 @@ plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30
   if (type=="hist") {
     # get value for vertical line
     if (vline=="centroids") {
-      dataLine <- centroids_tidy_format(x)
+      dataLine <- x$centroids %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
     } else if (vline=="mean") {
       dataLine <- data4plot %>%
         dplyr::group_by(.data$Cluster,.data$Feature) %>%
@@ -276,19 +281,21 @@ plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30
 }
 
 
-#' Convert centroids matrix into tidy format
+#' Print method for ClustImpute
 #'
-#' A helper function for plot() but may be useful for further post-processing of clustering results.
+#' Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
 #'
-#' @param x an object returned by ClustImpute
-#' @return data frame with three columns ( cluster | Features | value ) that uniquely defines the centroids#'
+#' @param x an object returned from ClustImpute
+#' @param ... currently unused
+#' @rdname print
 #' @export
-centroids_tidy_format <- function(x) {
-  cen <- as.data.frame(x$centroids)
-  names(cen) <- names(x$complete_data)
-  cen$Cluster <- 1:dim(cen)[1]
-  cen <- cen %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
-  return(cen)
+print.kmeans_ClustImpute = function(x,...) {
+  cat("Cluster centroids:")
+  print(knitr::kable(x$centroids))
+  cat("\n\n")
+  cat("Number of observations per cluster:")
+  print(knitr::kable(table(x$clusters)))
+  cat("Total number of observations:",dim(x$complete_data)[1])
 }
 
 

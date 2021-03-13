@@ -36,5 +36,5 @@
 Returns a ggplot object
 }
 \description{
-Returns a plot with the marginal distributions by cluster and feature. The plot is a ggplot object an can therefore be further modified.
+Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
 }

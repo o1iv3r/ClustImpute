@@ -66,7 +66,7 @@ or, in case the data shall be clustered uncentered, to turn of the down-weightin
 
 
 ``` r
-ClustImpute(X,nr_cluster,n_end=1)
+ClustImpute(X,nr_cluster,assign_with_wf=FALSE)
 ```
 
 ## Details on ClustImpute
