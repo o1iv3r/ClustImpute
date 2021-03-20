@@ -55,20 +55,6 @@ However, it is strongly advised to tune the other parameters. For a detailed exa
 vignette("Example_on_simulated_data")
 ```
 
-Also, in most cases it is recommended to center and scale the input data frame before clustering
-
-``` r
-X_scaled = scale(X)
-ClustImpute(X_scaled,nr_cluster)
-```
-
-or, in case the data shall be clustered uncentered, to turn of the down-weighting of the random imputations:
-
-
-``` r
-ClustImpute(X,nr_cluster,assign_with_wf=FALSE)
-```
-
 ## Details on ClustImpute
 
 This clustering algorithm deals with missing data via weights that are imposed on missings and succesively increased. The hope is that at some point the observed point is near a cluster that provides a good neighborhood to draw the missing variable from. The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distribution, e.g., as implemented in the MICE package.

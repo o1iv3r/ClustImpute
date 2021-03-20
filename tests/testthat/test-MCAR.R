@@ -43,6 +43,7 @@ nr_cluster <- 1 # there are no clusters
 
 # res_true <- ClustImpute(X,nr_cluster)
 res <- ClustImpute(Xmiss,nr_cluster)
+res_shrink_towards_global_mean_FALSE <- ClustImpute(Xmiss,nr_cluster,shrink_towards_global_mean=FALSE)
 
 test_that("Clustimpute: mean close to zero", {
   expect_lt(abs(res$imp_values_mean[11,1]), eps)
@@ -58,4 +59,8 @@ cor_diff <- cor(X)[1,2] # -cor(res$complete_data)[1,2]
 
 test_that("Clustimpute: correlation diff", {
   expect_lt(abs(cor_diff), eps)
+})
+
+test_that("shrink_towards_global_mean has no impact on scaled data", {
+  expect_equal(sum((res$centroids-res_shrink_towards_global_mean_FALSE$centroids)^2),0)
 })

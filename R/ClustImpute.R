@@ -6,16 +6,18 @@
 #' @param nr_cluster Number of clusters
 #' @param nr_iter Iterations of procedure
 #' @param c_steps Number of clustering steps per iteration
-#' @param wf Weight function. linear up to n_end by default
+#' @param wf Weight function. Linear up to n_end by default. Used to shrink X towards zero or the global mean (default). See shrink_towards_global_mean
 #' @param n_end Steps until convergence of weight function to 1
 #' @param seed_nr Number for set.seed()
-#' @param assign_with_wf Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
+#' @param assign_with_wf Default is TRUE. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
+#' @param shrink_towards_global_mean By default TRUE. The weight matrix w is applied on the difference of X from the global mean m, i.e, (x-m)*w+m
 #'
 #' @return
 #' \describe{
 #'   \item{complete_data}{Completed data without NAs}
 #'   \item{clusters}{For each row of complete_data, the associated cluster}
-#'   \item{centroids}{For each cluster, the coordinates of the centroids}
+#'   \item{centroids}{For each cluster, the coordinates of the centroids in tidy format}
+#'   \item{centroids_matrix}{For each cluster, the coordinates of the centroids in matrix format}
 #'   \item{imp_values_mean}{Mean of the imputed variables per draw}
 #'   \item{imp_values_sd}{Standard deviation of the imputed variables per draw}
 #' }
@@ -46,7 +48,7 @@
 #'res$centroids
 #'
 #' @export
-ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE) {
+ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE, shrink_towards_global_mean = TRUE) {
 
   mis_ind <- is.na(X) # missing indicator
 
@@ -67,11 +69,33 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   mean_imp <- sapply(X*org_is_false,mean,na.rm=TRUE)
   sd_imp <- sapply(X*org_is_false,stats::sd,na.rm=TRUE)
 
+
   for (n in 1:nr_iter) {
-    # Use weights to adjust the scale of a variable specifically for each observation
+
+    # mean_by_feature <- X %>% tidyr::pivot_longer(cols=tidyselect::everything(), names_to = "Feature", values_to = "Value") %>%
+    #   dplyr::group_by(.data$Feature) %>% dplyr::summarise(Value=mean(.data$Value)) # compute overall mean by feature
+
+    mean_by_feature <- colMeans(X)
+
+    # Use weights to adjust the scale of a variable specifically for each observation and to regularize towards the overall variable mean
     args_wf <- list(n,n_end)
     weight_matrix <- 1 - mis_ind * do.call(wf, args_wf)
-    X_down_weighted <- weight_matrix*X
+    if (shrink_towards_global_mean) {
+      global_mean <- matrix(rep(mean_by_feature,times=dim(X)[1]),ncol=length(mean_by_feature),byrow=TRUE)
+      # use weight w to shrink towards global mean m of the feature: (x-m)*w+m
+      X_down_weighted <- (X-global_mean) * weight_matrix + global_mean
+    } else {
+      if(n==1) {
+        # probe if data is centered by computing the max
+        is_centered <- max(abs(mean_by_feature))<1e-1
+        if (!is_centered) {
+          warning("For non-centered data we recommend the option shrink_towards_global_mean=TRUE")
+          cat("The mean by feature after random imputation is given by:")
+          print(knitr::kable(mean_by_feature))
+        }
+      }
+      X_down_weighted <- X * weight_matrix # shrink towards zero
+    }
 
     # perform clustering
     if (n==1) {
@@ -148,6 +172,7 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
 
   return (res)
 }
+
 
 
 #' Check and replace duplicate (centroid) rows
