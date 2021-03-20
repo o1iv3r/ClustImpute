@@ -49,7 +49,7 @@ library(ClustImpute)
 ClustImpute(X,nr_cluster)
 ```
 
-However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette
+However, it is strongly advised to tune the other parameters. For a detailed example please refer to the vignette. 
 
 ``` r
 vignette("Example_on_simulated_data")

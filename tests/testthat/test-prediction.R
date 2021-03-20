@@ -25,8 +25,9 @@ tmp <- res$complete_data %>% mutate(pred=res$clusters)
 tmp <- tmp %>% group_by(pred) %>% summarise(V1=mean(V1),V2=mean(V2)) %>% select(-pred)
 # take mean from result object in tmp2
 tmp2 <- res$centroids
-class(tmp2) <- "matrix" # not necessary in newer versions
-tmp2 <- as.data.frame(tmp2)
+tmp2$Cluster <- NULL
+# class(tmp2) <- "matrix" # not necessary in newer versions
+# tmp2 <- as.data.frame(tmp2)
 
 # vector of distance between the centroids
 centroid_dist <- (apply((tmp-tmp2)^2,mean,MARGIN=1))^.5

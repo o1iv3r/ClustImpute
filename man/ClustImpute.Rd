@@ -12,7 +12,8 @@ ClustImpute(
   wf = default_wf,
   n_end = 10,
   seed_nr = 150519,
-  assign_with_wf = TRUE
+  assign_with_wf = TRUE,
+  shrink_towards_global_mean = TRUE
 )
 }
 \arguments{
@@ -24,19 +25,22 @@ ClustImpute(
 
 \item{c_steps}{Number of clustering steps per iteration}
 
-\item{wf}{Weight function. linear up to n_end by default}
+\item{wf}{Weight function. Linear up to n_end by default. Used to shrink X towards zero or the global mean (default). See shrink_towards_global_mean}
 
 \item{n_end}{Steps until convergence of weight function to 1}
 
 \item{seed_nr}{Number for set.seed()}
 
-\item{assign_with_wf}{Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.}
+\item{assign_with_wf}{Default is TRUE. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.}
+
+\item{shrink_towards_global_mean}{By default TRUE. The weight matrix w is applied on the difference of X from the global mean m, i.e, (x-m)*w+m}
 }
 \value{
 \describe{
   \item{complete_data}{Completed data without NAs}
   \item{clusters}{For each row of complete_data, the associated cluster}
-  \item{centroids}{For each cluster, the coordinates of the centroids}
+  \item{centroids}{For each cluster, the coordinates of the centroids in tidy format}
+  \item{centroids_matrix}{For each cluster, the coordinates of the centroids in matrix format}
   \item{imp_values_mean}{Mean of the imputed variables per draw}
   \item{imp_values_sd}{Standard deviation of the imputed variables per draw}
 }

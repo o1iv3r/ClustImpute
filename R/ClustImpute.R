@@ -6,16 +6,18 @@
 #' @param nr_cluster Number of clusters
 #' @param nr_iter Iterations of procedure
 #' @param c_steps Number of clustering steps per iteration
-#' @param wf Weight function. linear up to n_end by default
+#' @param wf Weight function. Linear up to n_end by default. Used to shrink X towards zero or the global mean (default). See shrink_towards_global_mean
 #' @param n_end Steps until convergence of weight function to 1
 #' @param seed_nr Number for set.seed()
-#' @param assign_with_wf Default is True. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
+#' @param assign_with_wf Default is TRUE. If set to False, then the weight function is only applied in the centroid computation, but ignored in the cluster assignment.
+#' @param shrink_towards_global_mean By default TRUE. The weight matrix w is applied on the difference of X from the global mean m, i.e, (x-m)*w+m
 #'
 #' @return
 #' \describe{
 #'   \item{complete_data}{Completed data without NAs}
 #'   \item{clusters}{For each row of complete_data, the associated cluster}
-#'   \item{centroids}{For each cluster, the coordinates of the centroids}
+#'   \item{centroids}{For each cluster, the coordinates of the centroids in tidy format}
+#'   \item{centroids_matrix}{For each cluster, the coordinates of the centroids in matrix format}
 #'   \item{imp_values_mean}{Mean of the imputed variables per draw}
 #'   \item{imp_values_sd}{Standard deviation of the imputed variables per draw}
 #' }
@@ -46,7 +48,7 @@
 #'res$centroids
 #'
 #' @export
-ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE) {
+ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_end=10, seed_nr=150519, assign_with_wf = TRUE, shrink_towards_global_mean = TRUE) {
 
   mis_ind <- is.na(X) # missing indicator
 
@@ -67,11 +69,33 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   mean_imp <- sapply(X*org_is_false,mean,na.rm=TRUE)
   sd_imp <- sapply(X*org_is_false,stats::sd,na.rm=TRUE)
 
+
   for (n in 1:nr_iter) {
-    # Use weights to adjust the scale of a variable specifically for each observation
+
+    # mean_by_feature <- X %>% tidyr::pivot_longer(cols=tidyselect::everything(), names_to = "Feature", values_to = "Value") %>%
+    #   dplyr::group_by(.data$Feature) %>% dplyr::summarise(Value=mean(.data$Value)) # compute overall mean by feature
+
+    mean_by_feature <- colMeans(X)
+
+    # Use weights to adjust the scale of a variable specifically for each observation and to regularize towards the overall variable mean
     args_wf <- list(n,n_end)
     weight_matrix <- 1 - mis_ind * do.call(wf, args_wf)
-    X_down_weighted <- weight_matrix*X
+    if (shrink_towards_global_mean) {
+      global_mean <- matrix(rep(mean_by_feature,times=dim(X)[1]),ncol=length(mean_by_feature),byrow=TRUE)
+      # use weight w to shrink towards global mean m of the feature: (x-m)*w+m
+      X_down_weighted <- (X-global_mean) * weight_matrix + global_mean
+    } else {
+      if(n==1) {
+        # probe if data is centered by computing the max
+        is_centered <- max(abs(mean_by_feature))<1e-1
+        if (!is_centered) {
+          warning("For non-centered data we recommend the option shrink_towards_global_mean=TRUE")
+          cat("The mean by feature after random imputation is given by:")
+          print(knitr::kable(mean_by_feature))
+        }
+      }
+      X_down_weighted <- X * weight_matrix # shrink towards zero
+    }
 
     # perform clustering
     if (n==1) {
@@ -134,15 +158,21 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
   # predict cluster one last time on final draws
   pred <- ClusterR::predict_KMeans(X,cl_new)
   class(pred) <- "integer"
+
+  # convert centroids into nice format
   class(cl_new) <- "matrix"
+  centroids <- as.data.frame(cl_new)
+  names(centroids) <- names(X)
+  centroids$Cluster <- 1:dim(centroids)[1]
 
   # return all relevant results
   # parameters are provided as attributes
-  res <- structure(list(complete_data=X,clusters=pred,centroids=cl_new,imp_values_mean=mean_imp,imp_values_sd=sd_imp),
+  res <- structure(list(complete_data=X,clusters=pred,centroids=centroids,centroids_matrix=cl_new,imp_values_mean=mean_imp,imp_values_sd=sd_imp),
                    class="kmeans_ClustImpute",nr_iter=nr_iter, c_steps=c_steps, wf=wf, n_end=n_end, seed_nr=seed_nr)
 
   return (res)
 }
+
 
 
 #' Check and replace duplicate (centroid) rows
@@ -228,9 +258,69 @@ default_wf <- function(n,n_end=10) {
 #' @rdname predict
 #' @export
 predict.kmeans_ClustImpute <- function(object,newdata,...) {
-  pred <- ClusterR::predict_KMeans(newdata,object$centroids)
+  pred <- ClusterR::predict_KMeans(newdata,object$centroids_matrix)
   class(pred) <- "integer"
   return(pred)
+}
+
+
+#' Plot showing marginal distribution by cluster assignment
+#'
+#' Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
+#'
+#' @param x an object returned from ClustImpute
+#' @param type either "hist" to plot a histogram or "box" for a boxplot
+#' @param vline for "hist" a vertical line is plotted showing either the centroid value or the mean of all data points grouped by cluster and feature
+#' @param hist_bins number of bins for histogram
+#' @param color_bins color for the histogram bins
+#' @param color_vline color for the vertical line
+#' @param size_vline size of the vertical line
+#' @param ... currently unused
+#' @return Returns a ggplot object
+#' @rdname plot
+#' @export
+plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30,color_bins="#56B4E9",color_vline="#E69F00",size_vline=2,...) {
+  complete_data <- x$complete_data
+  complete_data$Cluster <- x$cluster
+  # reshape data for ggplot
+  data4plot <-  complete_data %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
+
+  if (type=="hist") {
+    # get value for vertical line
+    if (vline=="centroids") {
+      dataLine <- x$centroids %>% tidyr::pivot_longer(!.data$Cluster, names_to = "Feature", values_to = "value")
+    } else if (vline=="mean") {
+      dataLine <- data4plot %>%
+        dplyr::group_by(.data$Cluster,.data$Feature) %>%
+        dplyr::summarize(value = mean(.data$value))
+    } else stop("vline must be either 'centroids' or 'mean'")
+    p <- ggplot2::ggplot(data4plot) + ggplot2::geom_histogram(ggplot2::aes(x = .data$value), bins=hist_bins, fill=color_bins) +
+      ggplot2::facet_grid(.data$Feature~.data$Cluster,labeller = ggplot2::label_both) +
+      ggplot2::geom_vline(data=dataLine,ggplot2::aes(xintercept=.data$value),size=size_vline,color=color_vline) + ggplot2::theme_light()
+  } else if (type=="box") {
+    p <- ggplot2::ggplot(data4plot, ggplot2::aes(x = .data$value, y = .data$Feature)) + ggplot2::geom_boxplot() +
+      ggplot2::facet_grid(~.data$Cluster,labeller = ggplot2::label_both) +  ggplot2::theme_classic()
+  } else stop("type must bei either 'hist' or 'box'")
+
+  return(p)
+}
+
+
+#' Print method for ClustImpute
+#'
+#' Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
+#'
+#' @param x an object returned from ClustImpute
+#' @param ... currently unused
+#' @rdname print
+#' @export
+print.kmeans_ClustImpute = function(x,...) {
+  cat("Cluster centroids:")
+  print(knitr::kable(x$centroids))
+  cat("\n\n")
+  cat("Number of observations per cluster:")
+  print(knitr::kable(table(x$clusters)))
+  cat("Total number of observations:",dim(x$complete_data)[1])
 }
 
 

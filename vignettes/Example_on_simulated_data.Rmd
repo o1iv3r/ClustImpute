@@ -1,8 +1,6 @@
 ---
 title: "Example_on_simulated_data"
 output: rmarkdown::html_vignette
-fig_width: 6 
-fig_height: 4 
 vignette: >
   %\VignetteIndexEntry{Example_on_simulated_data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -131,11 +129,12 @@ tic("Run ClustImpute")
 res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
 toc()
 ```
+To get an overview of what ClustImpute you may run the following commands:
 
-ClustImpute provides several results:
-
-```{r}
-str(res)
+```{r eval=FALSE}
+res
+summary(res)
+attributes(res)
 ```
 
 We'll first look at the complete data and clustering results. Quite obviously, it gives better results than median / random imputation.
@@ -144,6 +143,22 @@ We'll first look at the complete data and clustering results. Quite obviously, i
 p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
 ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
 ```
+## Marginal distributions by cluster and feature
+
+In this toy example we already know that we only have to focus on the "real" features x and y, but this will not be the case in practice. Therefore one can also plot the distributions by cluster and feature.The orange bars are showing the cluster centroids. The plots for x and y are in line what we have seen above, and there is not much difference in the noise features V1 to V4 as one would expect.
+
+```{r fig.width=10, fig.height=7}
+plot(res)+xlim(-2.5,2.5)
+```
+
+Alternatively once can also visualize the marginal distributions with a box-plot.
+
+```{r fig.width=10, fig.height=7}
+plot(res, type="box")
+```
+
+
+## Traceplot of mean and variance
 
 Packages like MICE compute a traceplot of mean and variance for various chain. Here we only have a single realization  and thus re-run ClustImpute with various seeds to obtain different realizations. 
 
