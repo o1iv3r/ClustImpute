@@ -16,13 +16,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, include = FALSE}
-library(ClustImpute)
-required_packages <- Hmisc::Cs(psych,ggplot2,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr,corrplot)
-lapply(required_packages, require, character.only = TRUE)
-```
 
 # Simulated data with missings
+
+We start by loading R packages used in this example
+
+```{r setup, warning=FALSE, message=FALSE}
+required_packages <- Hmisc::Cs(psych,ggplot2,ggExtra,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr,corrplot,ClustImpute)
+lapply(required_packages, require, character.only = TRUE)
+```
 
 First we create a random dataset with some structure and a few uncorrelated variables
 
@@ -44,11 +46,10 @@ summary(dat)
 One can clearly see the three clusters of the randomly generated data:
 
 ```{r}
-library(ggExtra)
 dat4plot <- dat
 dat4plot$true_clust_fct <- factor(true_clust)
 p_base <- ggplot(dat4plot,aes(x=x,y=y,color=true_clust_fct)) + geom_point()
-ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
 ```
 
 
@@ -63,7 +64,7 @@ mis_ind <- is.na(dat_with_miss) # missing indicator
 The correlation matrix of the missing indicator shows that the missings are correlated - thus we are not in a missing completely at random stetting:
 
 ```{r}
-corrplot(cor(mis_ind),method="number")
+corrplot::corrplot(cor(mis_ind),method="number")
 ```
 
 
@@ -79,7 +80,7 @@ for (j in 1:dim(dat)[2]) {
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
 p_median_imp <- ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
-ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
 But also a random imputation is not much better: it creates plenty of points in areas with no data. Note how a simple check of the marginal distributions would not reveal this issue!
@@ -91,18 +92,18 @@ for (j in 1:dim(dat)[2]) {
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
 p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
-ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
 A cluster base on random imputation will thus not provide good results (even if we "know" the number of clusters, which is 3 in this case). Note how the marginal distribution for y differs from the first chart of this vignette where we show the true clusters instead of the predicted clusters from a random imputation.
 
 ```{r}
-tic("Clustering based on random imputation")
+tictoc::tic("Clustering based on random imputation")
 cl_compare <- KMeans_arma(data=dat_random_imp,clusters=3,n_iter=100,seed=751)
-toc()
+tictoc::toc()
 dat_random_imp$pred <- predict_KMeans(dat_random_imp,cl_compare)
 p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
-ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 ```
 
 
@@ -125,9 +126,9 @@ nr_iter <- 10 # iterations of procedure
 n_end <- 10 # step until convergence of weight function to 1
 nr_cluster <- 3 # number of clusters
 c_steps <- 50 # numer of cluster steps per iteration
-tic("Run ClustImpute")
+tictoc::tic("Run ClustImpute")
 res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
-toc()
+tictoc::toc()
 ```
 To get an overview of what ClustImpute you may run the following commands:
 
@@ -141,7 +142,7 @@ We'll first look at the complete data and clustering results. Quite obviously, i
 
 ```{r}
 p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
-ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
 ```
 ## Marginal distributions by cluster and feature
 
