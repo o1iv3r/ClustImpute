@@ -1,3 +1,8 @@
+# ClustImpute 0.2.1
+
+* Packages in suggests used conditionally also in the vignette
+* Vignettes shows loaded packages
+
 # ClustImpute 0.2.0
 
 * It used to be the (strong) recommendation to center the data if a weight function is used (n_end >1). Now, by default, the scaling with the weight function is towards the global overall mean of each feature. Thus, for centered data there is almost no change (due the random imputation mechanism data with a true unknown mean of zero might have an empirical mean unequal to zero).
