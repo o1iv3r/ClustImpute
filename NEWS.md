@@ -1,3 +1,7 @@
+# ClustImpute 0.2.2
+
+* Updated description to fix CRAN NOTE
+
 # ClustImpute 0.2.1
 
 * Packages in suggests used conditionally also in the vignette
