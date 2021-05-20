@@ -1,3 +1,7 @@
+# ClustImpute 0.2.3
+
+* Title field now in title case to comply with CRAN policies
+
 # ClustImpute 0.2.2
 
 * Updated description to fix CRAN NOTE

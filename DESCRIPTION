@@ -1,7 +1,7 @@
 Package: ClustImpute
 Type: Package
-Title: K-means clustering with build-in missing data imputation
-Version: 0.2.2
+Title: K-Means Clustering with Build-in Missing Data Imputation
+Version: 0.2.3
 Author: Oliver Pfaffel
 Maintainer: Oliver Pfaffel <opfaffel@gmail.com>
 Description: This k-means algorithm is able to cluster data with missing values and as a by-product completes the data set. The implementation can deal with missing values in multiple variables and is computationally efficient since it iteratively uses the current cluster assignment to define a plausible distribution for missing value imputation. Weights are used to shrink early random draws for missing values (i.e., draws based on the cluster assignments after few iterations) towards the global mean of each feature. This shrinkage slowly fades out after a fixed number of iterations to reflect the increasing credibility of cluster assignments. See the vignette for details.
