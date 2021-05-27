@@ -90,8 +90,8 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
         is_centered <- max(abs(mean_by_feature))<1e-1
         if (!is_centered) {
           warning("For non-centered data we recommend the option shrink_towards_global_mean=TRUE")
-          cat("The mean by feature after random imputation is given by:")
-          print(knitr::kable(mean_by_feature))
+          message("The mean by feature after random imputation is given by:")
+          message(knitr::kable(mean_by_feature))
         }
       }
       X_down_weighted <- X * weight_matrix # shrink towards zero
@@ -182,6 +182,8 @@ ClustImpute <- function(X,nr_cluster, nr_iter=10, c_steps=1, wf=default_wf, n_en
 #' @param centroids Matrix of centroids
 #' @param X Underlying data matrix (without missings)
 #' @param seed Seed used for random sampling
+#'
+#' @return Returns centroids where duplicate rows are replaced by random draws
 #'
 check_replace_dups <- function(centroids, X, seed) {
   # check if new centroids contain duplicate rows (min checks that indeed all values in a row are duplicates)
@@ -312,6 +314,9 @@ plot.kmeans_ClustImpute <- function(x,type="hist",vline="centroids",hist_bins=30
 #'
 #' @param x an object returned from ClustImpute
 #' @param ... currently unused
+#'
+#' @return No return value (print function)
+#'
 #' @rdname print
 #' @export
 print.kmeans_ClustImpute = function(x,...) {
