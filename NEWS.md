@@ -1,3 +1,8 @@
+# ClustImpute 0.2.4
+
+* print()/cat() replaced by message()/warning(), except for print function
+* Improved documentation of return values
+
 # ClustImpute 0.2.3
 
 * Title field now in title case to comply with CRAN policies

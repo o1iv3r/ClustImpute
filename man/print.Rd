@@ -11,6 +11,9 @@
 
 \item{...}{currently unused}
 }
+\value{
+No return value (print function)
+}
 \description{
 Returns a plot with the marginal distributions by cluster and feature. The plot shows histograms or boxplots and , as a ggplot object, can be modified further.
 }

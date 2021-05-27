@@ -13,6 +13,9 @@ check_replace_dups(centroids, X, seed)
 
 \item{seed}{Seed used for random sampling}
 }
+\value{
+Returns centroids where duplicate rows are replaced by random draws
+}
 \description{
 Internal function of ClustImpute: check new centroids for duplicate rows and replace with random draws in this case.
 }
