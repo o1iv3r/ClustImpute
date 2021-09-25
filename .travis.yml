@@ -5,10 +5,10 @@ cache: packages
 warnings_are_errors: false # tex on travis R-dev produces lots of warnings
 
 before_install:
-  - echo "options(repos = c(CRAN = 'https://packagemanager.rstudio.com/all/__linux__/xenial/latest'))" >> ~/.Rprofile.site
-  - echo "options(HTTPUserAgent = paste0('R/', getRversion(), ' R (',
-       paste(getRversion(), R.version['platform'], R.version['arch'], R.version['os']),
-       ')'))" >> ~/.Rprofile.site
+#  - echo "options(repos = c(CRAN = 'https://packagemanager.rstudio.com/all/__linux__/xenial/latest'))" >> ~/.Rprofile.site
+#  - echo "options(HTTPUserAgent = paste0('R/', getRversion(), ' R (',
+#       paste(getRversion(), R.version['platform'], R.version['arch'], R.version['os']),
+#       ')'))" >> ~/.Rprofile.site
 #  - sudo apt-get install libgsl0-dev libgsl2
   - sudo apt-get update
   - sudo apt install libgsl-dev
