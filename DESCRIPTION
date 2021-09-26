@@ -10,6 +10,7 @@ Encoding: UTF-8
 Imports: 
     ClusterR,
     copula,
+    gsl (== 2.1-6)
     dplyr,
     magrittr,
     tidyr,
