@@ -23,13 +23,11 @@ r:
   - release
   - devel
 
-# r_github_packages:
-#  - r-lib/covr
-#  - cran/gsl
+# r_packages:
 
-r_packages:
-  - covr
-  - gsl
+r_github_packages:
+  - r-lib/covr
+  - cran/gsl
 
 after_success:
   - Rscript -e 'covr::codecov()'
