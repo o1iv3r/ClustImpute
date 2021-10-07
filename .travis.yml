@@ -10,8 +10,8 @@ before_install:
 #       paste(getRversion(), R.version['platform'], R.version['arch'], R.version['os']),
 #       ')'))" >> ~/.Rprofile.site
 #  - sudo apt-get install libgsl0-dev libgsl2
-  - sudo apt-get update
-  - sudo apt install libgsl-dev
+#  - sudo apt-get update
+  - sudo apt-get install libgsl-dev libgsl0-dev
 
 # env:
 #  global:
